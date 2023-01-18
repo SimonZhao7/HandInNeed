@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "371941251551",
+    "project_id": "hand-in-need",
+    "storage_bucket": "hand-in-need.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:371941251551:android:d341731488e20fd6298c6a",
+        "android_client_info": {
+          "package_name": "com.example.hand_in_need"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "371941251551-nm7sgsvbimg4etebo8q4da9i3lsiido9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3kIETGLJaCSlQWC06TBx70UoXE9tBGOc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "371941251551-nm7sgsvbimg4etebo8q4da9i3lsiido9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
