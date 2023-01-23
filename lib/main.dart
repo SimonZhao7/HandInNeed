@@ -43,6 +43,13 @@ class MyApp extends StatelessWidget {
           displayColor: Colors.black,
           bodyColor: Colors.black,
         ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            backgroundColor: const Color(black),
+            foregroundColor: const Color(white),
+            padding: const EdgeInsets.all(15),
+          ),
+        ),
       ),
       home: const RegisterView(),
       routes: {

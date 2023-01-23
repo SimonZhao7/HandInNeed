@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // Widgets
 import 'package:hand_in_need/widgets/input.dart';
+import 'package:hand_in_need/widgets/button.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -48,6 +49,24 @@ class _RegisterViewState extends State<RegisterView> {
               hint: 'E.g. 444-444-4444',
               type: TextInputType.phone,
               borderWidth: 2,
+            ),
+            const SizedBox(height: 40),
+            Button(
+              onPressed: () {},
+              center: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Text(
+                    'Next',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  Icon(Icons.arrow_forward_outlined),
+                ],
+              ),
+              height: 55,
             ),
           ],
         ),
