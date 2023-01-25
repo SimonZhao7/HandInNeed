@@ -15,6 +15,7 @@ class Input extends StatelessWidget {
   final double borderWidth;
   final int borderColor;
   final int maxLines;
+  final int? maxLength;
   final int? focusedBorderColor;
   final int? cursorColor;
 
@@ -33,6 +34,7 @@ class Input extends StatelessWidget {
     this.autofocus = false,
     this.autocorrect = false,
     this.maxLines = defaultMaxLines,
+    this.maxLength,
   });
 
   @override
@@ -46,6 +48,7 @@ class Input extends StatelessWidget {
       autocorrect: autocorrect,
       autofocus: autofocus,
       maxLines: maxLines,
+      maxLength: maxLength,
       style: const TextStyle(
         color: Colors.black,
       ),
@@ -80,6 +83,7 @@ class Input extends StatelessWidget {
           color: Color(mediumGray),
           fontWeight: FontWeight.w500,
         ),
+        counter: SizedBox(height: 0),
       ),
     );
   }

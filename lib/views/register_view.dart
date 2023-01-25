@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hand_in_need/constants/routes.dart';
+import 'package:hand_in_need/widgets/error_snackbar.dart';
 // Widgets
 import 'package:hand_in_need/widgets/input.dart';
 import 'package:hand_in_need/widgets/button.dart';
@@ -52,7 +55,49 @@ class _RegisterViewState extends State<RegisterView> {
             ),
             const SizedBox(height: 40),
             Button(
-              onPressed: () {},
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                final focus = FocusScope.of(context);
+                final phoneNumber = _phoneNumber.text;
+
+                if (!focus.hasPrimaryFocus) {
+                  focus.unfocus();
+                }
+
+                await FirebaseAuth.instance.verifyPhoneNumber(
+                  phoneNumber: '+1$phoneNumber',
+                  verificationCompleted: (
+                    PhoneAuthCredential credential,
+                  ) async {
+                    await FirebaseAuth.instance
+                        .signInWithCredential(credential);
+                  },
+                  verificationFailed: (e) {
+                    if (e.code == 'invalid-phone-number') {
+                      showErrorSnackbar(
+                        context,
+                        'Please enter a valid phone number',
+                      );
+                    } else if (e.code == 'too-many-requests') {
+                      showErrorSnackbar(
+                        context,
+                        'Too many sign in attempts. Please try again later',
+                      );
+                    } else {
+                      showErrorSnackbar(
+                        context,
+                        'Something went wrong',
+                      );
+                    }
+                  },
+                  codeSent: (verficationId, resendToken) {
+                    navigator.pushNamed(verifyPhoneRoute,
+                        arguments: verficationId);
+                    _phoneNumber.text = '';
+                  },
+                  codeAutoRetrievalTimeout: (text) {},
+                );
+              },
               center: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: const [
