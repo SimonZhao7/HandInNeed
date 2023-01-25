@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:hand_in_need/views/account_setup_view.dart';
+import 'package:hand_in_need/views/home_view.dart';
 // Views
 import 'package:hand_in_need/views/register_view.dart';
 // Constants
@@ -47,6 +51,7 @@ class MyApp extends StatelessWidget {
               fontSize: 20,
               fontWeight: FontWeight.w500,
             ),
+            labelMedium: TextStyle(fontSize: 16),
           ).apply(
             displayColor: Colors.black,
             bodyColor: Colors.black,
@@ -62,10 +67,48 @@ class MyApp extends StatelessWidget {
             backgroundColor: Colors.black,
             focusColor: Colors.white,
           )),
-      home: const RegisterView(),
+      home: const Home(),
       routes: {
         registerRoute: (context) => const RegisterView(),
         verifyPhoneRoute: (context) => const VerifyPhoneView(),
+        accountSetupRoute: (context) => const AccountSetupView(),
+        homeRoute: (context) => const HomeView(),
+      },
+    );
+  }
+}
+
+class Home extends StatelessWidget {
+  const Home({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const RegisterView();
+    }
+    final userData = FirebaseFirestore.instance
+        .collection('users')
+        .where('user_id', isEqualTo: user.uid)
+        .get();
+    return FutureBuilder(
+      future: userData,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final data = snapshot.data!;
+          if (data.docs.isEmpty) {
+            return const AccountSetupView();
+          } else {
+            return const HomeView();
+          }
+        } else {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
       },
     );
   }
