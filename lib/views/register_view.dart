@@ -1,5 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+// Services
+import 'package:hand_in_need/services/auth/auth_exceptions.dart';
+import 'package:hand_in_need/services/auth/auth_service.dart';
 // Widgets
 import 'package:hand_in_need/widgets/input.dart';
 import 'package:hand_in_need/widgets/button.dart';
@@ -15,6 +17,7 @@ class RegisterView extends StatefulWidget {
 }
 
 class _RegisterViewState extends State<RegisterView> {
+  final _authService = AuthService();
   late TextEditingController _phoneNumber;
 
   @override
@@ -64,36 +67,30 @@ class _RegisterViewState extends State<RegisterView> {
                   focus.unfocus();
                 }
 
-                await FirebaseAuth.instance.verifyPhoneNumber(
-                  phoneNumber: '+1$phoneNumber',
-                  verificationCompleted: (
-                    PhoneAuthCredential credential,
-                  ) {
-                    _navigateToVerification(credential.verificationId!);
-                  },
-                  verificationFailed: (e) {
-                    if (e.code == 'invalid-phone-number') {
-                      showErrorSnackbar(
-                        context,
-                        'Please enter a valid phone number',
-                      );
-                    } else if (e.code == 'too-many-requests') {
-                      showErrorSnackbar(
-                        context,
-                        'Too many sign in attempts. Please try again later',
-                      );
-                    } else {
-                      showErrorSnackbar(
-                        context,
-                        'Something went wrong',
-                      );
-                    }
-                  },
-                  codeSent: (verificationId, resendToken) {
-                    _navigateToVerification(verificationId);
-                  },
-                  codeAutoRetrievalTimeout: (_) {},
-                );
+                try {
+                  final verificationId =
+                      await _authService.sendPhoneVerification(
+                    phoneNumber: phoneNumber,
+                  );
+                  _navigateToVerification(verificationId);
+                } on AuthException catch (e) {
+                  if (e is InvalidPhoneNumberAuthException) {
+                    showErrorSnackbar(
+                      context,
+                      'Please enter a valid phone number',
+                    );
+                  } else if (e is TooManyRequestsAuthException) {
+                    showErrorSnackbar(
+                      context,
+                      'Too many sign in attempts. Please try again later',
+                    );
+                  } else {
+                    showErrorSnackbar(
+                      context,
+                      'Something went wrong',
+                    );
+                  }
+                }
               },
               center: Row(
                 mainAxisSize: MainAxisSize.min,

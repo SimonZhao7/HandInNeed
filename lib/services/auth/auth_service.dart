@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 // Firebase
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,6 +34,34 @@ class AuthService {
       final data = query.docs[0];
       return AuthUser.fromFirebase(data);
     }
+  }
+
+  Future<String> sendPhoneVerification({
+    required String phoneNumber,
+  }) async {
+    Completer<String> result = Completer();
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: '+1$phoneNumber',
+      verificationCompleted: (
+        PhoneAuthCredential credential,
+      ) {
+        result.complete(credential.verificationId);
+      },
+      verificationFailed: (e) {
+        if (e.code == 'invalid-phone-number') {
+          result.completeError(InvalidPhoneNumberAuthException());
+        } else if (e.code == 'too-many-requests') {
+          result.completeError(TooManyRequestsAuthException());
+        } else {
+          result.completeError(GenericAuthException());
+        }
+      },
+      codeSent: (verificationId, resendToken) {
+        result.complete(verificationId);
+      },
+      codeAutoRetrievalTimeout: (_) {},
+    );
+    return result.future;
   }
 
   Future<void> signOut() async {
