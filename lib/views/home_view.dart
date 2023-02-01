@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hand_in_need/services/auth/auth_service.dart';
 // Widgets
 import '../widgets/button.dart';
-// Firebase
-import 'package:firebase_auth/firebase_auth.dart';
 // Constants
 import '../constants/routes.dart';
 
@@ -11,6 +10,8 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authService = AuthService();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
@@ -22,8 +23,9 @@ class HomeView extends StatelessWidget {
           width: double.infinity,
           child: Button(
             onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.of(context).pushNamedAndRemoveUntil(
+              final navigator = Navigator.of(context);
+              await authService.signOut();
+              navigator.pushNamedAndRemoveUntil(
                 registerRoute,
                 (route) => false,
               );

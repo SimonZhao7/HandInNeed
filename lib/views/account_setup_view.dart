@@ -1,17 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+// Services
+import 'package:hand_in_need/services/auth/auth_exceptions.dart';
+import 'package:hand_in_need/services/auth/auth_service.dart';
 // Widgets
 import '../widgets/button.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
-// Firebase
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 // Constants
 import '../constants/routes.dart';
 // Util
-import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AccountSetupView extends StatefulWidget {
@@ -22,6 +20,7 @@ class AccountSetupView extends StatefulWidget {
 }
 
 class _AccountSetupViewState extends State<AccountSetupView> {
+  final _authService = AuthService();
   late TextEditingController _email;
   late TextEditingController _firstName;
   late TextEditingController _lastName;
@@ -55,97 +54,48 @@ class _AccountSetupViewState extends State<AccountSetupView> {
     final lastName = _lastName.text;
     final userName = _userName.text;
     final description = _description.text;
-    final user = FirebaseAuth.instance.currentUser!;
     final focus = FocusScope.of(context);
     final navigator = Navigator.of(context);
-    final users = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isEqualTo: userName)
-        .get();
 
     if (!focus.hasPrimaryFocus) {
       focus.unfocus();
     }
 
     try {
-      if (email.trim().isEmpty) {
+      await _authService.finishAccountSetup(
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        userName: userName,
+        description: description,
+        image: image,
+      );
+      navigator.pushNamedAndRemoveUntil(homeRoute, (route) => false);
+    } catch (e) {
+      if (e is NoEmailProvidedAuthException) {
         showErrorSnackbar(context, 'No email provided');
-        return;
-      }
-
-      if (userName.trim().isEmpty) {
+      } else if (e is NoUserNameProvidedAuthException) {
         showErrorSnackbar(context, 'No username provided');
-        return;
-      }
-
-      if (userName.trim().length < 8) {
+      } else if (e is UserNameTooShortAuthException) {
         showErrorSnackbar(
           context,
           'Username must be at least 8 characters long',
         );
-        return;
-      }
-
-      if (users.docs.isNotEmpty) {
+      } else if (e is UserNameAlreadyExistsAuthException) {
         showErrorSnackbar(
           context,
           'A user already exists with the provided username',
         );
-        return;
-      }
-
-      if (firstName.trim().isEmpty) {
+      } else if (e is NoFirstNameProvidedAuthException) {
         showErrorSnackbar(context, 'No first name provided');
-        return;
-      }
-
-      if (lastName.trim().isEmpty) {
+      } else if (e is NoLastNameProvidedAuthException) {
         showErrorSnackbar(context, 'No last name provided');
         return;
-      }
-
-      if (image == null) {
+      } else if (e is NoProfilePictureProvidedAuthException) {
         showErrorSnackbar(context, 'No profile picture provided');
-        return;
-      }
-
-      await user.updateEmail(email);
-
-      final ref = FirebaseStorage.instance.ref(
-        'profile_images/${const Uuid().v4()}-${image!.name}',
-      );
-      final uploadState = ref.putFile(File(image!.path));
-      uploadState.snapshotEvents.listen((TaskSnapshot event) async {
-        switch (event.state) {
-          case TaskState.paused:
-            break;
-          case TaskState.running:
-            break;
-          case TaskState.canceled:
-            break;
-          case TaskState.error:
-            break;
-          case TaskState.success:
-            final url = await ref.getDownloadURL();
-            await user.updatePhotoURL(url);
-        }
-      });
-
-      await FirebaseFirestore.instance.collection('users').add({
-        'user_id': user.uid,
-        'username': userName,
-        'first_name': firstName,
-        'last_name': lastName,
-        'description': description,
-        'hours_worked': 0,
-        'opportunities': [],
-      });
-      await user.sendEmailVerification();
-      navigator.pushNamedAndRemoveUntil(homeRoute, (route) => false);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-email') {
+      } else if (e is InvalidEmailAuthException) {
         showErrorSnackbar(context, 'The email provided is invalid');
-      } else if (e.code == 'email-already-in-use') {
+      } else if (e is EmailAlreadyInUseAuthException) {
         showErrorSnackbar(
           context,
           'A user already exists with the provided email',
@@ -153,8 +103,6 @@ class _AccountSetupViewState extends State<AccountSetupView> {
       } else {
         showErrorSnackbar(context, 'Something went wrong');
       }
-    } catch (e) {
-      showErrorSnackbar(context, 'Something went wrong');
     }
   }
 

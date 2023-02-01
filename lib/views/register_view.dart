@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hand_in_need/constants/routes.dart';
-import 'package:hand_in_need/widgets/error_snackbar.dart';
 // Widgets
 import 'package:hand_in_need/widgets/input.dart';
 import 'package:hand_in_need/widgets/button.dart';
+import 'package:hand_in_need/widgets/error_snackbar.dart';
+// Constants
+import 'package:hand_in_need/constants/routes.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -56,7 +57,6 @@ class _RegisterViewState extends State<RegisterView> {
             const SizedBox(height: 40),
             Button(
               onPressed: () async {
-                final navigator = Navigator.of(context);
                 final focus = FocusScope.of(context);
                 final phoneNumber = _phoneNumber.text;
 
@@ -68,9 +68,8 @@ class _RegisterViewState extends State<RegisterView> {
                   phoneNumber: '+1$phoneNumber',
                   verificationCompleted: (
                     PhoneAuthCredential credential,
-                  ) async {
-                    await FirebaseAuth.instance
-                        .signInWithCredential(credential);
+                  ) {
+                    _navigateToVerification(credential.verificationId!);
                   },
                   verificationFailed: (e) {
                     if (e.code == 'invalid-phone-number') {
@@ -90,12 +89,10 @@ class _RegisterViewState extends State<RegisterView> {
                       );
                     }
                   },
-                  codeSent: (verficationId, resendToken) {
-                    navigator.pushNamed(verifyPhoneRoute,
-                        arguments: verficationId);
-                    _phoneNumber.text = '';
+                  codeSent: (verificationId, resendToken) {
+                    _navigateToVerification(verificationId);
                   },
-                  codeAutoRetrievalTimeout: (text) {},
+                  codeAutoRetrievalTimeout: (_) {},
                 );
               },
               center: Row(
@@ -117,5 +114,14 @@ class _RegisterViewState extends State<RegisterView> {
         ),
       ),
     );
+  }
+
+  void _navigateToVerification(String verificationId) {
+    final navigator = Navigator.of(context);
+    navigator.pushNamed(
+      verifyPhoneRoute,
+      arguments: verificationId,
+    );
+    _phoneNumber.text = '';
   }
 }

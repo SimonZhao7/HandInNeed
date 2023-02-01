@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hand_in_need/services/auth/auth_exceptions.dart';
+import 'package:hand_in_need/services/auth/auth_service.dart';
 // Widgets
 import 'package:hand_in_need/widgets/button.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
-// Firebase
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// Services
+import '../services/auth/auth_user.dart';
 // Constants
 import 'package:hand_in_need/constants/routes.dart';
 
@@ -17,6 +18,7 @@ class VerifyPhoneView extends StatefulWidget {
 }
 
 class _VerifyPhoneViewState extends State<VerifyPhoneView> {
+  final _authService = AuthService();
   late TextEditingController _verificationCode;
 
   @override
@@ -67,24 +69,20 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
                           ModalRoute.of(context)?.settings.arguments as String;
                       final focus = FocusScope.of(context);
                       final navigator = Navigator.of(context);
-                      final credential = PhoneAuthProvider.credential(
-                        verificationId: verificationId,
-                        smsCode: _verificationCode.text,
-                      );
+                      final verificationCode = _verificationCode.text;
 
                       if (!focus.hasPrimaryFocus) {
                         focus.unfocus();
                       }
 
-                      final userCredential = await FirebaseAuth.instance
-                          .signInWithCredential(credential);
-                      final user = userCredential.user!;
-                      final firebaseUser = await FirebaseFirestore.instance
-                          .collection('users')
-                          .where('user_id', isEqualTo: user.uid)
-                          .get();
+                      await _authService.verifyPhoneNumber(
+                        verificationId: verificationId,
+                        verificationCode: verificationCode,
+                      );
 
-                      if (firebaseUser.docs.isEmpty) {
+                      final AuthUser? currentUser =
+                          await _authService.currentUser();
+                      if (currentUser == null) {
                         navigator.pushNamed(accountSetupRoute);
                       } else {
                         navigator.pushNamedAndRemoveUntil(
@@ -92,11 +90,23 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
                           (route) => false,
                         );
                       }
-                    } on FirebaseAuthException catch (_) {
-                      showErrorSnackbar(
-                        context,
-                        'Invalid verification code',
-                      );
+                    } on AuthException catch (e) {
+                      if (e is InvalidVerificationCodeAuthException) {
+                        showErrorSnackbar(
+                          context,
+                          'Invalid verification code',
+                        );
+                      } else if (e is SessionExpiredAuthException) {
+                        showErrorSnackbar(
+                          context,
+                          'Expired verification code. Please log in again for another code',
+                        );
+                      } else {
+                        showErrorSnackbar(
+                          context,
+                          'Something went wrong',
+                        );
+                      }
                     }
                   },
                   label: 'Next',
