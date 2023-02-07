@@ -46,6 +46,8 @@ dependencies:
     image_picker: ^0.8.6+1
     firebase_storage: ^11.0.10
     uuid: ^3.0.7
+    flutter_dotenv: ^5.0.2
+    http: ^0.13.5
 
 dev_dependencies:
     flutter_test:
@@ -104,3 +106,6 @@ flutter:
               - asset: fonts/Montserrat/Montserrat-Regular.ttf
               - asset: fonts/Montserrat/Montserrat-Medium.ttf
               - asset: fonts/Montserrat/Montserrat-Bold.ttf
+
+    assets: 
+        - .env

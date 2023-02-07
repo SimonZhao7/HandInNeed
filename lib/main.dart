@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hand_in_need/views/account_setup_view.dart';
 import 'package:hand_in_need/views/home_view.dart';
 // Views
@@ -10,6 +11,7 @@ import 'package:hand_in_need/views/register_view.dart';
 import 'package:hand_in_need/constants/colors.dart';
 import 'package:hand_in_need/constants/routes.dart';
 import 'package:hand_in_need/views/verify_phone_view.dart';
+import 'package:hand_in_need/widgets/autocomplete/address_search.dart';
 
 import 'firebase_options.dart';
 
@@ -18,6 +20,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }
 
@@ -72,6 +75,7 @@ class MyApp extends StatelessWidget {
         registerRoute: (context) => const RegisterView(),
         verifyPhoneRoute: (context) => const VerifyPhoneView(),
         accountSetupRoute: (context) => const AccountSetupView(),
+        inputAddressRoute: (context) => const AddressSearch(),
         homeRoute: (context) => const HomeView(),
       },
     );
