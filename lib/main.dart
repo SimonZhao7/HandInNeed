@@ -1,19 +1,21 @@
+import 'package:flutter/material.dart';
+// Firebase
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:hand_in_need/views/account_setup_view.dart';
-import 'package:hand_in_need/views/home_view.dart';
+import 'firebase_options.dart';
 // Views
+import 'package:hand_in_need/widgets/autocomplete/address_search.dart';
+import 'package:hand_in_need/views/add_opportunity_view.dart';
+import 'package:hand_in_need/views/account_setup_view.dart';
+import 'package:hand_in_need/views/verify_phone_view.dart';
 import 'package:hand_in_need/views/register_view.dart';
+import 'package:hand_in_need/views/home_view.dart';
 // Constants
 import 'package:hand_in_need/constants/colors.dart';
 import 'package:hand_in_need/constants/routes.dart';
-import 'package:hand_in_need/views/verify_phone_view.dart';
-import 'package:hand_in_need/widgets/autocomplete/address_search.dart';
-
-import 'firebase_options.dart';
+// Util
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,6 +77,7 @@ class MyApp extends StatelessWidget {
         registerRoute: (context) => const RegisterView(),
         verifyPhoneRoute: (context) => const VerifyPhoneView(),
         accountSetupRoute: (context) => const AccountSetupView(),
+        addOpportunityRoute: (context) => const AddOpportunity(),
         inputAddressRoute: (context) => const AddressSearch(),
         homeRoute: (context) => const HomeView(),
       },

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 // Constants
-import 'package:hand_in_need/constants/colors.dart';
 import 'package:hand_in_need/constants/widget_const/default_input_values.dart';
+import 'package:hand_in_need/constants/colors.dart';
 
 class Input extends StatelessWidget {
+  final void Function(String)? onChanged;
+  final void Function()? onTap;
   final TextEditingController controller;
   final TextInputType? type;
   final EdgeInsetsGeometry? innerPadding;
@@ -11,6 +13,7 @@ class Input extends StatelessWidget {
   final bool password;
   final bool autofocus;
   final bool autocorrect;
+  final bool readOnly;
   final double borderRadius;
   final double borderWidth;
   final int borderColor;
@@ -18,6 +21,7 @@ class Input extends StatelessWidget {
   final int? maxLength;
   final int? focusedBorderColor;
   final int? cursorColor;
+  final int? fillColor;
 
   const Input({
     super.key,
@@ -35,6 +39,10 @@ class Input extends StatelessWidget {
     this.autocorrect = false,
     this.maxLines = defaultMaxLines,
     this.maxLength,
+    this.fillColor,
+    this.onChanged,
+    this.onTap,
+    this.readOnly = false,
   });
 
   @override
@@ -49,10 +57,15 @@ class Input extends StatelessWidget {
       autofocus: autofocus,
       maxLines: maxLines,
       maxLength: maxLength,
+      onChanged: onChanged,
       style: const TextStyle(
         color: Colors.black,
       ),
+      onTap: onTap,
+      readOnly: readOnly,
       decoration: InputDecoration(
+        filled: true,
+        fillColor: fillColor != null ? Color(fillColor!) : null,
         contentPadding: innerPadding ??
             const EdgeInsets.symmetric(
               vertical: defaultInnerPaddingV,
@@ -83,7 +96,7 @@ class Input extends StatelessWidget {
           color: Color(mediumGray),
           fontWeight: FontWeight.w500,
         ),
-        counter: SizedBox(height: 0),
+        counter: const SizedBox(height: 0),
       ),
     );
   }
