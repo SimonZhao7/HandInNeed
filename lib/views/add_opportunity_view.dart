@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-// Firebase
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 // Services
-import 'package:hand_in_need/services/auth/auth_service.dart';
+import 'package:hand_in_need/services/opportunities/opportunity_exceptions.dart';
+import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
 // Widgets
 import '../widgets/autocomplete/autocomplete_result.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
@@ -13,13 +11,8 @@ import '../widgets/button.dart';
 // Constants
 import 'package:hand_in_need/constants/routes.dart';
 // Util
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:validators/validators.dart';
-import 'package:http/http.dart' as http;
-import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
-import 'dart:convert';
-import 'dart:io';
+
 
 class AddOpportunity extends StatefulWidget {
   const AddOpportunity({super.key});
@@ -29,7 +22,7 @@ class AddOpportunity extends StatefulWidget {
 }
 
 class _AddOpportunityState extends State<AddOpportunity> {
-  final AuthService _authService = AuthService();
+  final OpportunityService _opportunityService = OpportunityService();
   late TextEditingController _title;
   late TextEditingController _description;
   late TextEditingController _url;
@@ -186,140 +179,59 @@ class _AddOpportunityState extends State<AddOpportunity> {
     final description = _description.text;
     final url = _url.text;
     final organizationEmail = _organizationEmail.text;
-
-    if (title.trim().length < 8) {
-      showErrorSnackbar(context, 'Provided title is too short');
-      return;
-    }
-
-    if (url.trim().isEmpty) {
-      showErrorSnackbar(context, 'No url provided');
-      return;
-    }
-
-    if (!isURL(url, requireProtocol: true, requireTld: true)) {
-      showErrorSnackbar(
-        context,
-        'Please enter a valid url',
-      );
-      return;
-    }
-
-    if (organizationEmail.trim().isEmpty) {
-      showErrorSnackbar(context, 'No organization email provided');
-      return;
-    }
-
-    if (!isEmail(organizationEmail)) {
-      showErrorSnackbar(context, 'Invalid email');
-      return;
-    }
-
-    if (selectedPhoto == null) {
-      showErrorSnackbar(context, 'No photo provided');
-      return;
-    }
-
-    if (startDate == null) {
-      showErrorSnackbar(context, 'No start date provided');
-      return;
-    }
-
-    if (startTime == null) {
-      showErrorSnackbar(context, 'No start time provided');
-      return;
-    }
-
-    if (endTime == null) {
-      showErrorSnackbar(context, 'No end time provided');
-      return;
-    }
-
-    if (endTime!.hour + endTime!.minute / 60 <
-        startTime!.hour + startTime!.minute / 60) {
-      showErrorSnackbar(
-        context,
-        'The end time must be later than the start time',
-      );
-      return;
-    }
-
-    if (location == null) {
-      showErrorSnackbar(context, 'No location provided');
-      return;
-    }
+    final navigator = Navigator.of(context);
 
     try {
-      final user = (await _authService.currentUser())!;
-      final db = FirebaseFirestore.instance.collection('opportunities');
-      final storage = FirebaseStorage.instance.ref('/opportunity_photos');
-      final placesUrl = Uri.https(
-        'maps.googleapis.com',
-        '/maps/api/place/details/json',
-        {
-          'place_id': location!.placeId ?? '',
-          'fields': [
-            'place_id',
-            'formatted_address',
-            'formatted_phone_number',
-            'geometry',
-            'name',
-            'website',
-          ].join(','),
-          'key': dotenv.env['MAPS_API_KEY'],
-        },
+      await _opportunityService.addOpportunity(
+        title: title,
+        description: description,
+        url: url,
+        organizationEmail: organizationEmail,
+        selectedPhoto: selectedPhoto,
+        startDate: startDate,
+        startTime: startTime,
+        endTime: endTime,
+        location: location,
       );
-
-      final response = await http.get(placesUrl);
-
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final result = body['result'];
-
-        final file = File(selectedPhoto!.path);
-        final storageRef =
-            storage.child('${const Uuid().v4()}-${selectedPhoto!.name}');
-        await storageRef.putFile(file);
-        final imageUrl = await storageRef.getDownloadURL();
-
-        await db.add({
-          'user': user.id,
-          'title': title,
-          'description': description,
-          'url': url,
-          'organization_email': organizationEmail,
-          'attendees': [],
-          'verified': false,
-          'start_date': startDate,
-          'start_time': startDate!.add(
-            Duration(
-              hours: startTime!.hour,
-              minutes: startTime!.minute,
-            ),
-          ),
-          'end_time': startDate!.add(
-            Duration(
-              hours: endTime!.hour,
-              minutes: endTime!.minute,
-            ),
-          ),
-          'image': imageUrl,
-          'created_at': FieldValue.serverTimestamp(),
-          // Place
-          'place_id': result['place_id'],
-          'address': result['formatted_address'],
-          'phone_number': result['formatted_phone_number'],
-          'lat': result['geometry']['location']['lat'],
-          'lng': result['geometry']['location']['lng'],
-          'place_website': result['website'],
-        });
-        Navigator.of(context).pop();
-      }
+      navigator.pop();
     } catch (e) {
-      showErrorSnackbar(
-        context,
-        'Location can not be found in this address. Please enter a different location.',
-      );
+      if (e is TitleTooShortOpportunityException) {
+        showErrorSnackbar(context, 'Provided title is too short');
+      } else if (e is NoUrlProvidedOpportunityException) {
+        showErrorSnackbar(context, 'No url provided');
+      } else if (e is InvalidUrlOpportunityException) {
+        showErrorSnackbar(
+          context,
+          'Please enter a valid url',
+        );
+      } else if (e is NoOrganizationEmailProvidedOpportunityExcpetion) {
+        showErrorSnackbar(context, 'No organization email provided');
+      } else if (e is InvalidOrganizationEmailOpportunityExcpetion) {
+        showErrorSnackbar(context, 'Invalid email');
+      } else if (e is NoPhotoProvidedOpportunityException) {
+        showErrorSnackbar(context, 'No photo provided');
+      } else if (e is NoStartDateProvidedOpportunityException) {
+        showErrorSnackbar(context, 'No start date provided');
+      } else if (e is NoStartTimeProvidedOpportunityException) {
+        showErrorSnackbar(context, 'No start time provided');
+      } else if (e is NoEndTimeProvidedOpportunityExcpeption) {
+        showErrorSnackbar(context, 'No end time provided');
+      } else if (e is OutOfOrderTimesOpportunityException) {
+        showErrorSnackbar(
+          context,
+          'The end time must be later than the start time',
+        );
+      } else if (e is NoLocationProvidedOpportunityExcpetion) {
+        showErrorSnackbar(context, 'No location provided');
+        return;
+      } else if (e is LocationNotFoundOpportunityException) {
+        showErrorSnackbar(
+          context,
+          'Location can not be found in this address. Please enter a different location.',
+        );
+      } else {
+        showErrorSnackbar(context, 'Something went wrong');
+      }
     }
   }
 
