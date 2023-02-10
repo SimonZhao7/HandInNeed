@@ -18,6 +18,8 @@ class AuthService {
   AuthService.instance();
   factory AuthService() => _shared;
 
+  User get userDetails => FirebaseAuth.instance.currentUser!;
+
   Future<AuthUser?> currentUser() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;

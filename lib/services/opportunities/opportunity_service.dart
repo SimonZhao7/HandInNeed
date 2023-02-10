@@ -19,24 +19,29 @@ import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'dart:io';
 
-
 class OpportunityService {
   static final OpportunityService _shared =
       OpportunityService._sharedInstance();
   OpportunityService._sharedInstance();
   factory OpportunityService() => _shared;
+  final _authService = AuthService();
 
   final db = FirebaseFirestore.instance.collection(collectionName);
 
-  Stream<List<Opportunity>> allOpportunities() => db.snapshots().map(
-        (s) => s.docs
-            .map(
-              Opportunity.fromFirebase,
-            )
-            .toList(),
-      );
+  Stream<List<Opportunity>> allOpportunities() =>
+      db.snapshots().map((s) => s.docs.map(Opportunity.fromFirebase).toList());
 
-Future<void> addOpportunity({
+  Stream<List<Opportunity>> yourOpportunities() => db
+      .where(userIdField, isEqualTo: _authService.userDetails.uid)
+      .snapshots()
+      .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
+
+  Stream<List<Opportunity>> manageOpportunities() => db
+      .where(organizationEmailField, isEqualTo: _authService.userDetails.email)
+      .snapshots()
+      .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
+
+  Future<void> addOpportunity({
     required String title,
     required String description,
     required String url,
@@ -93,7 +98,6 @@ Future<void> addOpportunity({
     }
 
     try {
-      final user = (await AuthService().currentUser())!;
       final storage = FirebaseStorage.instance.ref(imagesPath);
       final placesUrl = Uri.https(
         domainName,
@@ -125,7 +129,7 @@ Future<void> addOpportunity({
         final imageUrl = await storageRef.getDownloadURL();
 
         await db.add({
-          userIdField: user.id,
+          userIdField: _authService.userDetails.uid,
           titleField: title,
           descriptionField: description,
           urlField: url,
@@ -160,5 +164,11 @@ Future<void> addOpportunity({
     } catch (e) {
       throw LocationNotFoundOpportunityException();
     }
+  }
+
+  Future<void> verifyOpportunity(String id) async {
+    await db.doc(id).update({
+      'verified': true,
+    });
   }
 }

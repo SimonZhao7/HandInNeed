@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_service.dart';
+import 'package:hand_in_need/views/opportunity_tabs_view.dart';
+import 'package:hand_in_need/views/account_settings_view.dart';
 // Constants
 import '../constants/routes.dart';
 
@@ -18,8 +20,8 @@ class _HomeViewState extends State<HomeView> {
   final List<Widget> content = [
     const Text('Home'),
     const Text('Upcoming'),
-    const Text('Your Jobs'),
-    const Text('Account'),
+    const OpportunityTabsView(),
+    const AccountSettingsView(),
   ];
 
   @override
@@ -27,7 +29,9 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        elevation: 0,
       ),
+      extendBody: true,
       body: content[_selectedIndex],
       bottomNavigationBar: BottomAppBar(
         notchMargin: 5,

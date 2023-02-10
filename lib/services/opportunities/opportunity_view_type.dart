@@ -1,0 +1,4 @@
+enum OpportunityViewType {
+  posted,
+  manage,
+}

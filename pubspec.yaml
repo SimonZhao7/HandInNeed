@@ -51,6 +51,7 @@ dependencies:
     validators: ^3.0.0
     intl: ^0.17.0
     google_maps_flutter: ^2.2.3
+    badges: ^3.0.2
 
 dev_dependencies:
     flutter_test:

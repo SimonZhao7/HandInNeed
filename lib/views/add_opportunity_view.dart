@@ -12,7 +12,7 @@ import '../widgets/button.dart';
 import 'package:hand_in_need/constants/routes.dart';
 // Util
 import 'package:intl/intl.dart';
-
+import 'dart:io';
 
 class AddOpportunity extends StatefulWidget {
   const AddOpportunity({super.key});
@@ -83,6 +83,17 @@ class _AddOpportunityState extends State<AddOpportunity> {
               Text('Organization Email', style: label),
               Input(controller: _organizationEmail),
               const SizedBox(height: 10),
+              if (selectedPhoto != null) ...[
+                SizedBox(
+                  height: 250,
+                  width: double.infinity,
+                  child: Image.file(
+                    File(selectedPhoto!.path),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
               Text('Image', style: label),
               Button(
                 onPressed: () async {
