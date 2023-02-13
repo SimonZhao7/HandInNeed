@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 // Views
 import 'package:hand_in_need/widgets/autocomplete/address_search.dart';
+import 'package:hand_in_need/views/opportunity_details_view.dart';
 import 'package:hand_in_need/views/add_opportunity_view.dart';
 import 'package:hand_in_need/views/account_setup_view.dart';
 import 'package:hand_in_need/views/verify_phone_view.dart';
@@ -52,6 +53,10 @@ class MyApp extends StatelessWidget {
               fontSize: 36,
               fontWeight: FontWeight.w500,
             ),
+            headline2: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w500,
+            ),
             headline3: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w500,
@@ -78,6 +83,7 @@ class MyApp extends StatelessWidget {
         verifyPhoneRoute: (context) => const VerifyPhoneView(),
         accountSetupRoute: (context) => const AccountSetupView(),
         addOpportunityRoute: (context) => const AddOpportunity(),
+        viewOpportunityRoute: (context) => const OpportunityDetailsView(),
         inputAddressRoute: (context) => const AddressSearch(),
         homeRoute: (context) => const HomeView(),
       },

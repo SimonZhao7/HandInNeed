@@ -52,6 +52,9 @@ dependencies:
     intl: ^0.17.0
     google_maps_flutter: ^2.2.3
     badges: ^3.0.2
+    crypto: ^3.0.2
+    transparent_image: ^2.0.0
+    url_launcher: ^6.1.9
 
 dev_dependencies:
     flutter_test:

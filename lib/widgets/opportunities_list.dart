@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hand_in_need/constants/routes.dart';
 // Services
 import 'package:hand_in_need/services/opportunities/opportunity_view_type.dart';
 import '../services/opportunities/opportunity_service.dart';
@@ -11,6 +12,7 @@ import 'package:hand_in_need/constants/colors.dart';
 import 'package:intl/intl.dart';
 
 class OpportunitiesList extends StatelessWidget {
+  static final opportunityService = OpportunityService();
   final Stream<List<Opportunity>> stream;
   final OpportunityViewType type;
 
@@ -22,7 +24,6 @@ class OpportunitiesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final opportunityService = OpportunityService();
     final dateFormat = DateFormat.yMd();
 
     return StreamBuilder(
@@ -38,6 +39,7 @@ class OpportunitiesList extends StatelessWidget {
                 final opportunity = data[index];
                 final place = opportunity.place;
                 final label = Theme.of(context).textTheme.labelMedium;
+                final navigator = Navigator.of(context);
 
                 return Card(
                   elevation: 3,
@@ -102,34 +104,19 @@ class OpportunitiesList extends StatelessWidget {
                         Row(
                           children: [
                             Expanded(
-                                flex: 1,
-                                child: type == OpportunityViewType.posted ||
-                                        (type == OpportunityViewType.manage &&
-                                            opportunity.verified)
-                                    ? Button(
-                                        onPressed: () {},
-                                        label: 'View',
-                                      )
-                                    : Button(
-                                        onPressed: () async {
-                                          await opportunityService
-                                              .verifyOpportunity(
-                                            opportunity.id,
-                                          );
-                                        },
-                                        label: 'Verify',
-                                      )),
-                            const SizedBox(width: 20),
-                            Expanded(
                               flex: 1,
-                              child: type == OpportunityViewType.manage &&
-                                      opportunity.verified
-                                  ? Button(
-                                      onPressed: () {},
-                                      label: 'Manage',
-                                    )
-                                  : const SizedBox(),
-                            )
+                              child: Button(
+                                onPressed: () {
+                                  navigator.pushNamed(
+                                    viewOpportunityRoute,
+                                    arguments: opportunity,
+                                  );
+                                },
+                                label: 'View',
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Expanded(flex: 1, child: _renderButton(opportunity))
                           ],
                         )
                       ],
@@ -147,5 +134,25 @@ class OpportunitiesList extends StatelessWidget {
         }
       },
     );
+  }
+
+  Widget _renderButton(Opportunity opportunity) {
+    if (type == OpportunityViewType.manage) {
+      return opportunity.verified
+          ? Button(
+              onPressed: () {},
+              label: 'Manage',
+            )
+          : Button(
+              onPressed: () async {
+                await opportunityService.verifyOpportunity(
+                  opportunity.id,
+                );
+              },
+              label: 'Verify',
+            );
+    } else {
+      return const SizedBox();
+    }
   }
 }
