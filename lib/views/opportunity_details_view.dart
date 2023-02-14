@@ -10,12 +10,11 @@ import 'package:transparent_image/transparent_image.dart';
 import 'package:intl/intl.dart';
 
 class OpportunityDetailsView extends StatelessWidget {
-  const OpportunityDetailsView({super.key});
+  final Opportunity opportunity;
+  const OpportunityDetailsView({super.key, required this.opportunity});
 
   @override
   Widget build(BuildContext context) {
-    final opportunity =
-        ModalRoute.of(context)!.settings.arguments as Opportunity;
     final authService = AuthService();
     final place = opportunity.place;
     final textStyle = Theme.of(context).textTheme;

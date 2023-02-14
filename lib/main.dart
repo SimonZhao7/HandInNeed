@@ -12,9 +12,13 @@ import 'package:hand_in_need/views/account_setup_view.dart';
 import 'package:hand_in_need/views/verify_phone_view.dart';
 import 'package:hand_in_need/views/register_view.dart';
 import 'package:hand_in_need/views/home_view.dart';
+// Services
+import 'services/opportunities/opportunity.dart';
 // Constants
 import 'package:hand_in_need/constants/colors.dart';
-import 'package:hand_in_need/constants/routes.dart';
+import 'package:hand_in_need/constants/route_names.dart';
+// Router
+import 'package:go_router/go_router.dart';
 // Util
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -27,66 +31,96 @@ void main() async {
   runApp(const MyApp());
 }
 
+final GoRouter _router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const Home(),
+    ),
+    GoRoute(
+      path: '/home',
+      name: home,
+      builder: (context, state) => const HomeView(),
+    ),
+    GoRoute(
+      path: '/address/input',
+      name: inputAddress,
+      builder: (context, state) => const AddressSearch(),
+    ),
+    GoRoute(
+      path: '/auth/register',
+      name: register,
+      builder: (context, state) => const RegisterView(),
+    ),
+    GoRoute(
+      name: accountSetup,
+      path: '/auth/setup',
+      builder: (context, state) => const AccountSetupView(),
+    ),
+    GoRoute(
+      path: '/auth/verify-phone/:verificationId',
+      name: verifyPhone,
+      builder: (context, state) => VerifyPhoneView(
+        verificationId: state.params['verificationId']!,
+      ),
+    ),
+    GoRoute(
+      path: '/opportunities/add',
+      name: addOpportunity,
+      builder: (context, state) => const AddOpportunity(),
+    ),
+    GoRoute(
+      path: '/opportunities/details',
+      name: viewOpportunity,
+      builder: (context, state) => OpportunityDetailsView(
+        opportunity: state.extra! as Opportunity,
+      ),
+    ),
+  ],
+);
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter Demo',
       theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
-          primarySwatch: Colors.blue,
-          primaryColor: const Color(blue),
-          fontFamily: 'Montserrat',
-          textTheme: const TextTheme(
-            headline1: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.w500,
-            ),
-            headline2: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w500,
-            ),
-            headline3: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
-            ),
-            labelMedium: TextStyle(fontSize: 16),
-          ).apply(
-            displayColor: Colors.black,
-            bodyColor: Colors.black,
+        primarySwatch: Colors.blue,
+        primaryColor: const Color(blue),
+        fontFamily: 'Montserrat',
+        textTheme: const TextTheme(
+          headline1: TextStyle(
+            fontSize: 36,
+            fontWeight: FontWeight.w500,
           ),
-          textButtonTheme: TextButtonThemeData(
-            style: TextButton.styleFrom(
-              backgroundColor: const Color(black),
-              foregroundColor: const Color(white),
-              padding: const EdgeInsets.all(15),
-            ),
+          headline2: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
-          floatingActionButtonTheme: const FloatingActionButtonThemeData(
-            backgroundColor: Colors.black,
-            focusColor: Colors.white,
-          )),
-      home: const Home(),
-      routes: {
-        registerRoute: (context) => const RegisterView(),
-        verifyPhoneRoute: (context) => const VerifyPhoneView(),
-        accountSetupRoute: (context) => const AccountSetupView(),
-        addOpportunityRoute: (context) => const AddOpportunity(),
-        viewOpportunityRoute: (context) => const OpportunityDetailsView(),
-        inputAddressRoute: (context) => const AddressSearch(),
-        homeRoute: (context) => const HomeView(),
-      },
+          headline3: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+          ),
+          labelMedium: TextStyle(fontSize: 16),
+        ).apply(
+          displayColor: Colors.black,
+          bodyColor: Colors.black,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            backgroundColor: const Color(black),
+            foregroundColor: const Color(white),
+            padding: const EdgeInsets.all(15),
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.black,
+          focusColor: Colors.white,
+        ),
+      ),
+      routerConfig: _router,
     );
   }
 }

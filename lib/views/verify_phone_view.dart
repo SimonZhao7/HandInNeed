@@ -8,10 +8,16 @@ import 'package:hand_in_need/widgets/input.dart';
 // Services
 import '../services/auth/auth_user.dart';
 // Constants
-import 'package:hand_in_need/constants/routes.dart';
+import 'package:hand_in_need/constants/route_names.dart';
+// Util
+import 'package:go_router/go_router.dart';
 
 class VerifyPhoneView extends StatefulWidget {
-  const VerifyPhoneView({super.key});
+  final String verificationId;
+  const VerifyPhoneView({
+    super.key,
+    required this.verificationId,
+  });
 
   @override
   State<VerifyPhoneView> createState() => _VerifyPhoneViewState();
@@ -65,10 +71,8 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
                 Button(
                   onPressed: () async {
                     try {
-                      final verificationId =
-                          ModalRoute.of(context)?.settings.arguments as String;
                       final focus = FocusScope.of(context);
-                      final navigator = Navigator.of(context);
+                      final navigator = GoRouter.of(context);
                       final verificationCode = _verificationCode.text;
 
                       if (!focus.hasPrimaryFocus) {
@@ -76,19 +80,16 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
                       }
 
                       await _authService.verifyPhoneNumber(
-                        verificationId: verificationId,
+                        verificationId: widget.verificationId,
                         verificationCode: verificationCode,
                       );
 
                       final AuthUser? currentUser =
                           await _authService.currentUser();
                       if (currentUser == null) {
-                        navigator.pushNamed(accountSetupRoute);
+                        navigator.pushNamed(accountSetup);
                       } else {
-                        navigator.pushNamedAndRemoveUntil(
-                          homeRoute,
-                          (route) => false,
-                        );
+                        navigator.goNamed(home);
                       }
                     } on AuthException catch (e) {
                       if (e is InvalidVerificationCodeAuthException) {

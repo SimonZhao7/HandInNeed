@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hand_in_need/constants/routes.dart';
 // Services
 import 'package:hand_in_need/services/opportunities/opportunity_view_type.dart';
 import '../services/opportunities/opportunity_service.dart';
@@ -7,8 +6,10 @@ import '../services/opportunities/opportunity.dart';
 // Widgets
 import 'package:hand_in_need/widgets/button.dart';
 // Constants
+import 'package:hand_in_need/constants/route_names.dart';
 import 'package:hand_in_need/constants/colors.dart';
 // Util
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class OpportunitiesList extends StatelessWidget {
@@ -39,7 +40,6 @@ class OpportunitiesList extends StatelessWidget {
                 final opportunity = data[index];
                 final place = opportunity.place;
                 final label = Theme.of(context).textTheme.labelMedium;
-                final navigator = Navigator.of(context);
 
                 return Card(
                   elevation: 3,
@@ -107,9 +107,9 @@ class OpportunitiesList extends StatelessWidget {
                               flex: 1,
                               child: Button(
                                 onPressed: () {
-                                  navigator.pushNamed(
-                                    viewOpportunityRoute,
-                                    arguments: opportunity,
+                                  context.pushNamed(
+                                    viewOpportunity,
+                                    extra: opportunity,
                                   );
                                 },
                                 label: 'View',

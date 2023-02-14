@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 // Services
 import 'package:hand_in_need/services/opportunities/opportunity_exceptions.dart';
 import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
+import 'package:hand_in_need/widgets/autocomplete/address_search.dart';
 // Widgets
 import '../widgets/autocomplete/autocomplete_result.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
 import 'package:image_picker/image_picker.dart';
 import '../widgets/button.dart';
-// Constants
-import 'package:hand_in_need/constants/routes.dart';
 // Util
 import 'package:intl/intl.dart';
 import 'dart:io';
@@ -167,8 +166,11 @@ class _AddOpportunityState extends State<AddOpportunity> {
                 readOnly: true,
                 controller: _address,
                 onTap: () async {
-                  final address = await Navigator.of(context)
-                      .pushNamed(inputAddressRoute) as AutocompleteResult?;
+                  final address = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const AddressSearch(),
+                    ),
+                  ) as AutocompleteResult?;
                   if (address == null) return;
                   _address.text = address.description;
                   setState(() {

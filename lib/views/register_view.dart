@@ -7,7 +7,9 @@ import 'package:hand_in_need/widgets/input.dart';
 import 'package:hand_in_need/widgets/button.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 // Constants
-import 'package:hand_in_need/constants/routes.dart';
+import 'package:hand_in_need/constants/route_names.dart';
+// Util
+import 'package:go_router/go_router.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -114,10 +116,11 @@ class _RegisterViewState extends State<RegisterView> {
   }
 
   void _navigateToVerification(String verificationId) {
-    final navigator = Navigator.of(context);
-    navigator.pushNamed(
-      verifyPhoneRoute,
-      arguments: verificationId,
+    context.pushNamed(
+      verifyPhone,
+      params: {
+        'verificationId': verificationId,
+      },
     );
     _phoneNumber.text = '';
   }

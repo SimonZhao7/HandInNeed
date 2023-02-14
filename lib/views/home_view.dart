@@ -4,7 +4,9 @@ import 'package:hand_in_need/services/auth/auth_service.dart';
 import 'package:hand_in_need/views/opportunity_tabs_view.dart';
 import 'package:hand_in_need/views/account_settings_view.dart';
 // Constants
-import '../constants/routes.dart';
+import '../constants/route_names.dart';
+// Uitl
+import 'package:go_router/go_router.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -73,7 +75,7 @@ class _HomeViewState extends State<HomeView> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).pushNamed(addOpportunityRoute);
+          context.pushNamed(addOpportunity);
         },
         child: const Icon(Icons.add),
       ),

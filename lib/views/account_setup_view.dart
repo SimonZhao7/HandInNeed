@@ -8,9 +8,10 @@ import '../widgets/button.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
 // Constants
-import '../constants/routes.dart';
+import '../constants/route_names.dart';
 // Util
 import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
 
 class AccountSetupView extends StatefulWidget {
   const AccountSetupView({super.key});
@@ -55,7 +56,7 @@ class _AccountSetupViewState extends State<AccountSetupView> {
     final userName = _userName.text;
     final description = _description.text;
     final focus = FocusScope.of(context);
-    final navigator = Navigator.of(context);
+    final navigator = GoRouter.of(context);
 
     if (!focus.hasPrimaryFocus) {
       focus.unfocus();
@@ -70,7 +71,7 @@ class _AccountSetupViewState extends State<AccountSetupView> {
         description: description,
         image: image,
       );
-      navigator.pushNamedAndRemoveUntil(homeRoute, (route) => false);
+      navigator.goNamed(home);
     } catch (e) {
       if (e is NoEmailProvidedAuthException) {
         showErrorSnackbar(context, 'No email provided');
@@ -112,7 +113,7 @@ class _AccountSetupViewState extends State<AccountSetupView> {
 
     return Scaffold(
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(30, 120, 30, 30),
+        padding: const EdgeInsets.symmetric(vertical: 120, horizontal: 30),
         children: [
           Text(
             'One more step...',
@@ -229,6 +230,13 @@ class _AccountSetupViewState extends State<AccountSetupView> {
             label: 'Create Account',
           )
         ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.goNamed(register);
+        },
+        child: const Icon(Icons.arrow_back),
       ),
     );
   }
