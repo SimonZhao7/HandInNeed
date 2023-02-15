@@ -63,6 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '371941251551',
     projectId: 'hand-in-need',
     storageBucket: 'hand-in-need.appspot.com',
+    androidClientId: '371941251551-meivnrog9352lkddd7i41858p3v2neo3.apps.googleusercontent.com',
     iosClientId: '371941251551-1n2s7lhhl8k4g7vfrpvuajnjf3aubktd.apps.googleusercontent.com',
     iosBundleId: 'com.example.handInNeed',
   );
