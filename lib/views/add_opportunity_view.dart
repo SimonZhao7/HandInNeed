@@ -217,9 +217,9 @@ class _AddOpportunityState extends State<AddOpportunity> {
           context,
           'Please enter a valid url',
         );
-      } else if (e is NoOrganizationEmailProvidedOpportunityExcpetion) {
+      } else if (e is NoOrganizationEmailProvidedOpportunityException) {
         showErrorSnackbar(context, 'No organization email provided');
-      } else if (e is InvalidOrganizationEmailOpportunityExcpetion) {
+      } else if (e is InvalidOrganizationEmailOpportunityException) {
         showErrorSnackbar(context, 'Invalid email');
       } else if (e is NoPhotoProvidedOpportunityException) {
         showErrorSnackbar(context, 'No photo provided');

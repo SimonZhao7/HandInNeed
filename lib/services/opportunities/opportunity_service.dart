@@ -1,3 +1,5 @@
+import 'package:crypto/crypto.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 // Firebase
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -65,11 +67,11 @@ class OpportunityService {
     }
 
     if (organizationEmail.trim().isEmpty) {
-      throw NoOrganizationEmailProvidedOpportunityExcpetion();
+      throw NoOrganizationEmailProvidedOpportunityException();
     }
 
     if (!isEmail(organizationEmail)) {
-      throw InvalidOrganizationEmailOpportunityExcpetion();
+      throw InvalidOrganizationEmailOpportunityException();
     }
 
     if (selectedPhoto == null) {
@@ -128,7 +130,7 @@ class OpportunityService {
         await storageRef.putFile(file);
         final imageUrl = await storageRef.getDownloadURL();
 
-        await db.add({
+        final ref = await db.add({
           userIdField: _authService.userDetails.uid,
           titleField: title,
           descriptionField: description,
@@ -160,15 +162,119 @@ class OpportunityService {
           websiteField: result[googleWebsiteField],
           placeNameField: result[placeNameField],
         });
+        await sendVerificationEmail(organizationEmail, ref.id);
       }
     } catch (e) {
       throw LocationNotFoundOpportunityException();
     }
   }
 
+  Future<void> transferOwnership({
+    required String id,
+    required String newEmail,
+    required String confirmEmail,
+  }) async {
+    final doc = db.doc(id);
+    final data = (await doc.get()).data()!;
+
+    if (!isEmail(newEmail)) {
+      throw InvalidOrganizationEmailOpportunityException();
+    }
+
+    if (newEmail != confirmEmail) {
+      throw EmailsDoNotMatchOpportunityException();
+    }
+
+    if (newEmail == data[organizationEmailField]) {
+      throw EmailNotChangedOpportunityException();
+    }
+
+    await doc.update({
+      organizationEmailField: newEmail,
+    });
+    await sendVerificationEmail(newEmail, id);
+  }
+
   Future<void> verifyOpportunity(String id) async {
     await db.doc(id).update({
       'verified': true,
     });
+  }
+
+  Future<void> sendVerificationEmail(String newEmail, String id) async {
+    final hash = _hashEmail(newEmail);
+    final dynamicLink = await _getDynamicLink(id, hash.toString());
+    await _sendVerificationEmail(newEmail, dynamicLink);
+  }
+
+  Digest _hashEmail(String organizationEmail) {
+    final encodedEmail = utf8.encode(organizationEmail);
+    final hash = md5.convert(encodedEmail);
+    return hash;
+  }
+
+  Future<Uri> _getDynamicLink(String id, String hash) async {
+    final dynamicLinkParams = DynamicLinkParameters(
+      link: Uri.parse(
+        'https://handinneed.page.link/opportunities/change-email/$id/$hash',
+      ),
+      uriPrefix: 'https://handinneed.page.link',
+      androidParameters: const AndroidParameters(
+        packageName: "com.example.hand_in_need",
+      ),
+    );
+
+    final dynamicLink = await FirebaseDynamicLinksPlatform.instance
+        .buildLink(dynamicLinkParams);
+    return dynamicLink;
+  }
+
+  Future<void> _sendVerificationEmail(String toEmail, Uri dynamicLink) async {
+    final sendEmailUrl = Uri.https(
+      'api.sendgrid.com',
+      '/v3/mail/send',
+    );
+
+    await http.post(
+      sendEmailUrl,
+      headers: {
+        'Authorization': 'Bearer ${dotenv.env['SENDGRID_API_KEY']}',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'personalizations': [
+          {
+            'to': [
+              {
+                'email': toEmail,
+              }
+            ],
+          }
+        ],
+        'from': {
+          'email': 'handinneedgsdc@gmail.com',
+          'name': 'The HandInNeed Team',
+        },
+        'subject': 'Volunteer Opportunity Hosting',
+        'content': [
+          {
+            'type': 'text/html',
+            'value': """
+              <p>Hello!<p>
+              <p>A user of our volunteer opportunity sharing app has decided to post details of your upcoming opportunity.</p>
+              <p>In order to verify and manage attendees from our app, please install and sign up with this email. 
+              Then, verify this opportuity by going to the "Your Jobs" section and the "Your Hostings" tab on the top. 
+              Find the correct opportunity and press verify to complete the verification and manage attendees.</p>
+              <p>If you prefer to use a different email for the account, please provide your desired email <a href="$dynamicLink">here</a></p>
+              <p>If you didn't organize an event, please disregard this email</p>
+              <br />
+              <br />
+              <p>Happy Volunteering,</p>
+              <b>- The HandInNeedTeam</b>
+            """,
+          }
+        ],
+      }),
+    );
   }
 }

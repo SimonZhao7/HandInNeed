@@ -4,9 +4,9 @@ class NoUrlProvidedOpportunityException implements Exception {}
 
 class InvalidUrlOpportunityException implements Exception {}
 
-class NoOrganizationEmailProvidedOpportunityExcpetion implements Exception {}
+class NoOrganizationEmailProvidedOpportunityException implements Exception {}
 
-class InvalidOrganizationEmailOpportunityExcpetion implements Exception {}
+class InvalidOrganizationEmailOpportunityException implements Exception {}
 
 class NoPhotoProvidedOpportunityException implements Exception {}
 
@@ -22,4 +22,6 @@ class NoLocationProvidedOpportunityExcpetion implements Exception {}
 
 class LocationNotFoundOpportunityException implements Exception {}
 
+class EmailNotChangedOpportunityException implements Exception {}
 
+class EmailsDoNotMatchOpportunityException implements Exception {}

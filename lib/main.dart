@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 // Firebase
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 // Views
 import 'package:hand_in_need/widgets/autocomplete/address_search.dart';
+import 'package:hand_in_need/views/change_opportunity_email.dart';
 import 'package:hand_in_need/views/opportunity_details_view.dart';
 import 'package:hand_in_need/views/add_opportunity_view.dart';
 import 'package:hand_in_need/views/account_setup_view.dart';
@@ -76,6 +78,14 @@ final GoRouter _router = GoRouter(
         opportunity: state.extra! as Opportunity,
       ),
     ),
+    GoRoute(
+      path: '/opportunities/change-email/:id/:emailHash',
+      name: changeOpportunityEmail,
+      builder: (context, state) => ChangeOpportunityEmailView(
+        opportunityId: state.params['id']!,
+        emailHash: state.params['emailHash']!,
+      ),
+    )
   ],
 );
 
@@ -130,6 +140,10 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
+      context.push(dynamicLinkData.link.path);
+    }).onError((_) {});
+    
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
