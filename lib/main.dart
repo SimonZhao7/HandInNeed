@@ -10,7 +10,7 @@ import 'package:hand_in_need/views/verify_email_view.dart';
 // LOGGING IN WITH GOOGLE AND FACEBOOK FOR HAND IN NEED APP
 // 46:20
 // Watch later vid to do this weekend start today
-
+// hello
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
