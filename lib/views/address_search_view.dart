@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'autocomplete_result.dart';
+// Widgets
+import 'package:hand_in_need/widgets/error_snackbar.dart';
+// Services
+import 'package:hand_in_need/services/google_places/google_places_exceptions.dart';
+import 'package:hand_in_need/services/google_places/google_places_service.dart';
+import '../services/google_places/autocomplete_result.dart';
 // Widgets
 import 'package:hand_in_need/widgets/input.dart';
 // Constants
 import 'package:hand_in_need/constants/colors.dart';
-// Util
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-class AddressSearch extends StatefulWidget {
-  const AddressSearch({super.key});
+class AddressSearchView extends StatefulWidget {
+  const AddressSearchView({super.key});
 
   @override
-  State<AddressSearch> createState() => _AddressSearchState();
+  State<AddressSearchView> createState() => _AddressSearchViewState();
 }
 
-class _AddressSearchState extends State<AddressSearch> {
+class _AddressSearchViewState extends State<AddressSearchView> {
   List<AutocompleteResult> results = [];
   late TextEditingController _searchInput;
+  final _placesService = GooglePlacesService();
 
   @override
   void initState() {
@@ -33,26 +35,25 @@ class _AddressSearchState extends State<AddressSearch> {
   }
 
   void _updateSearchResults(String text) async {
-    final url = Uri.https(
-      'maps.googleapis.com',
-      '/maps/api/place/autocomplete/json',
-      {
-        'input': text,
-        'radius': '50000',
-        'key': dotenv.env['MAPS_API_KEY'],
-      },
-    );
-
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final parsedData = jsonDecode(response.body);
-      final predictions = parsedData['predictions'] as List<dynamic>;
-      final newResults = predictions
-          .map((prediction) => AutocompleteResult.fromJson(prediction))
-          .toList();
+    try {
+      final newResults = await _placesService.autocompleteQuery(
+        query: text,
+      );
       setState(() {
         results = newResults;
       });
+    } catch (e) {
+      if (e is UnableToFetchGooglePlacesException) {
+        showErrorSnackbar(
+          context,
+          'Unable to fetch location data',
+        );
+      } else {
+        showErrorSnackbar(
+          context,
+          'Something went wrong',
+        );
+      }
     }
   }
 
@@ -65,6 +66,7 @@ class _AddressSearchState extends State<AddressSearch> {
           borderWidth: 0,
           fillColor: white,
           onChanged: _updateSearchResults,
+          autofocus: true,
           hint: 'Enter an address...',
         ),
         centerTitle: true,

@@ -6,4 +6,4 @@ const userNamefield = 'username';
 const descriptionField = 'description';
 const hoursWorkedField = 'hours_worked';
 const opportunitiesField = 'opportunities';
-const imagePath = 'profile_images/';
+const imagePath = 'profile_images';

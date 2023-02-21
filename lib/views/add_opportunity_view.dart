@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 // Services
+import 'package:hand_in_need/services/google_places/google_places_exceptions.dart';
 import 'package:hand_in_need/services/opportunities/opportunity_exceptions.dart';
 import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
-import 'package:hand_in_need/widgets/autocomplete/address_search.dart';
+import 'package:hand_in_need/views/address_search_view.dart';
 // Widgets
-import '../widgets/autocomplete/autocomplete_result.dart';
+import '../services/google_places/autocomplete_result.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
 import 'package:image_picker/image_picker.dart';
@@ -168,7 +169,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
                 onTap: () async {
                   final address = await Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const AddressSearch(),
+                      builder: (context) => const AddressSearchView(),
                     ),
                   ) as AutocompleteResult?;
                   if (address == null) return;
@@ -237,10 +238,10 @@ class _AddOpportunityState extends State<AddOpportunity> {
       } else if (e is NoLocationProvidedOpportunityExcpetion) {
         showErrorSnackbar(context, 'No location provided');
         return;
-      } else if (e is LocationNotFoundOpportunityException) {
+      } else if (e is UnableToFetchGooglePlacesException) {
         showErrorSnackbar(
           context,
-          'Location can not be found in this address. Please enter a different location.',
+          'Unable to fetch location details. Please enter a different location.',
         );
       } else {
         showErrorSnackbar(context, 'Something went wrong');

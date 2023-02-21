@@ -1,7 +1,8 @@
+// Firebase
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+// Services
 import 'package:hand_in_need/services/opportunities/fields.dart';
-import 'package:hand_in_need/services/opportunities/place.dart';
+import 'package:hand_in_need/services/google_places/place.dart';
 
 class Opportunity {
   final String id;
@@ -57,17 +58,7 @@ class Opportunity {
             (e) => e.toString(),
           )
           .toList(),
-      place: Place(
-        placeId: data[placeIdField],
-        address: data[addressField],
-        phoneNumber: data[phoneNumberField],
-        website: data[websiteField],
-        name: data[placeNameField],
-        location: LatLng(
-          data[latField],
-          data[lngField],
-        ),
-      ),
+      place: Place.fromFirebaseMap(data),
     );
   }
 }

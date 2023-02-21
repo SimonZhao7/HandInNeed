@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 // Firebase
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:hand_in_need/services/deep_links/deep_links_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 // Views
-import 'package:hand_in_need/widgets/autocomplete/address_search.dart';
 import 'package:hand_in_need/views/change_opportunity_email.dart';
 import 'package:hand_in_need/views/opportunity_details_view.dart';
 import 'package:hand_in_need/views/add_opportunity_view.dart';
+import 'package:hand_in_need/views/address_search_view.dart';
 import 'package:hand_in_need/views/account_setup_view.dart';
 import 'package:hand_in_need/views/verify_phone_view.dart';
 import 'package:hand_in_need/views/register_view.dart';
@@ -17,8 +17,8 @@ import 'package:hand_in_need/views/home_view.dart';
 // Services
 import 'services/opportunities/opportunity.dart';
 // Constants
-import 'package:hand_in_need/constants/colors.dart';
 import 'package:hand_in_need/constants/route_names.dart';
+import 'package:hand_in_need/constants/colors.dart';
 // Router
 import 'package:go_router/go_router.dart';
 // Util
@@ -47,7 +47,7 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/address/input',
       name: inputAddress,
-      builder: (context, state) => const AddressSearch(),
+      builder: (context, state) => const AddressSearchView(),
     ),
     GoRoute(
       path: '/auth/register',
@@ -140,11 +140,10 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
-      context.push(dynamicLinkData.link.path);
-    }).onError((_) {});
-    
+    final deepLinkService = DeepLinksService();
     final user = FirebaseAuth.instance.currentUser;
+
+    deepLinkService.handleLinkClicks(context);
 
     if (user == null) {
       return const RegisterView();

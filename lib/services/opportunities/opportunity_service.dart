@@ -1,31 +1,34 @@
-import 'package:crypto/crypto.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 // Firebase
+import 'package:hand_in_need/services/cloud_storage/cloud_storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 // Services
+import 'package:hand_in_need/services/google_places/google_places_service.dart';
+import 'package:hand_in_need/services/deep_links/deep_links_service.dart';
 import 'package:hand_in_need/services/opportunities/opportunity.dart';
+import 'package:hand_in_need/services/crypto/crypto_service.dart';
+import 'package:hand_in_need/services/email/email_service.dart';
 import 'package:hand_in_need/services/auth/auth_service.dart';
 // Widgets
-import 'package:hand_in_need/widgets/autocomplete/autocomplete_result.dart';
+import 'package:hand_in_need/services/google_places/autocomplete_result.dart';
 import 'package:image_picker/image_picker.dart';
 // Constants
 import 'package:hand_in_need/services/opportunities/opportunity_exceptions.dart';
 import 'package:hand_in_need/services/opportunities/fields.dart';
 // Util
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:validators/validators.dart';
-import 'package:http/http.dart' as http;
-import 'package:uuid/uuid.dart';
-import 'dart:convert';
-import 'dart:io';
 
 class OpportunityService {
   static final OpportunityService _shared =
       OpportunityService._sharedInstance();
   OpportunityService._sharedInstance();
   factory OpportunityService() => _shared;
+
+  final _storageService = CloudStorageService();
+  final _placesService = GooglePlacesService();
+  final _deepLinkService = DeepLinksService();
+  final _cryptoService = CryptoService();
+  final _emailService = EmailService();
   final _authService = AuthService();
 
   final db = FirebaseFirestore.instance.collection(collectionName);
@@ -99,74 +102,50 @@ class OpportunityService {
       throw NoLocationProvidedOpportunityExcpetion();
     }
 
-    try {
-      final storage = FirebaseStorage.instance.ref(imagesPath);
-      final placesUrl = Uri.https(
-        domainName,
-        pathName,
-        {
-          placeIdField: location.placeId ?? '',
-          fields: [
-            placeIdField,
-            formattedAddressField,
-            formattedPhoneNumberField,
-            geometryField,
-            placeNameField,
-            googleWebsiteField,
-          ].join(','),
-          key: dotenv.env['MAPS_API_KEY'],
-        },
-      );
+    final place = await _placesService.fetchPlace(location);
 
-      final response = await http.get(placesUrl);
+    final imageUrl = await _storageService.uploadImage(
+      selectedPhoto: selectedPhoto,
+      path: imagesPath,
+    );
 
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final result = body[resultField];
-
-        final file = File(selectedPhoto.path);
-        final storageRef =
-            storage.child('${const Uuid().v4()}-${selectedPhoto.name}');
-        await storageRef.putFile(file);
-        final imageUrl = await storageRef.getDownloadURL();
-
-        final ref = await db.add({
-          userIdField: _authService.userDetails.uid,
-          titleField: title,
-          descriptionField: description,
-          urlField: url,
-          organizationEmailField: organizationEmail,
-          attendeesField: [],
-          verifiedField: false,
-          startDateField: startDate,
-          startTimeField: startDate.add(
-            Duration(
-              hours: startTime.hour,
-              minutes: startTime.minute,
-            ),
-          ),
-          endTimeField: startDate.add(
-            Duration(
-              hours: endTime.hour,
-              minutes: endTime.minute,
-            ),
-          ),
-          imageField: imageUrl,
-          createdAtField: FieldValue.serverTimestamp(),
-          // Place
-          placeIdField: result[placeIdField],
-          addressField: result[formattedAddressField],
-          phoneNumberField: result[formattedPhoneNumberField],
-          latField: result[geometryField][locationField][latField],
-          lngField: result[geometryField][locationField][lngField],
-          websiteField: result[googleWebsiteField],
-          placeNameField: result[placeNameField],
-        });
-        await sendVerificationEmail(organizationEmail, ref.id);
-      }
-    } catch (e) {
-      throw LocationNotFoundOpportunityException();
-    }
+    final ref = await db.add({
+      userIdField: _authService.userDetails.uid,
+      titleField: title,
+      descriptionField: description,
+      urlField: url,
+      organizationEmailField: organizationEmail,
+      attendeesField: [],
+      verifiedField: false,
+      startDateField: startDate,
+      startTimeField: startDate.add(
+        Duration(
+          hours: startTime.hour,
+          minutes: startTime.minute,
+        ),
+      ),
+      endTimeField: startDate.add(
+        Duration(
+          hours: endTime.hour,
+          minutes: endTime.minute,
+        ),
+      ),
+      imageField: imageUrl,
+      createdAtField: FieldValue.serverTimestamp(),
+      // Place
+      placeIdField: place.placeId,
+      addressField: place.address,
+      phoneNumberField: place.phoneNumber,
+      latField: place.location.latitude,
+      lngField: place.location.longitude,
+      websiteField: place.website,
+      nameField: place.name,
+    });
+    
+    await _sendVerificationEmail(
+      newEmail: organizationEmail,
+      id: ref.id,
+    );
   }
 
   Future<void> transferOwnership({
@@ -192,7 +171,10 @@ class OpportunityService {
     await doc.update({
       organizationEmailField: newEmail,
     });
-    await sendVerificationEmail(newEmail, id);
+    await _sendVerificationEmail(
+      newEmail: newEmail,
+      id: id,
+    );
   }
 
   Future<void> verifyOpportunity(String id) async {
@@ -201,103 +183,18 @@ class OpportunityService {
     });
   }
 
-  Future<void> sendVerificationEmail(String newEmail, String id) async {
-    final hash = _hashEmail(newEmail);
-    final dynamicLink = await _getDynamicLink(id, hash.toString());
-    await _sendVerificationEmail(newEmail, dynamicLink);
-  }
-
-  Digest _hashEmail(String organizationEmail) {
-    final encodedEmail = utf8.encode(organizationEmail);
-    final hash = md5.convert(encodedEmail);
-    return hash;
-  }
-
-  Future<Uri> _getDynamicLink(String id, String hash) async {
-    final dynamicLinkParams = DynamicLinkParameters(
-      link: Uri.parse(
-        'https://handinneed.page.link/opportunities/change-email/$id/$hash',
-      ),
-      uriPrefix: 'https://handinneed.page.link',
-      androidParameters: const AndroidParameters(
-        packageName: "com.example.hand_in_need",
-      ),
+  Future<void> _sendVerificationEmail({
+    required String newEmail,
+    required String id,
+  }) async {
+    final hash = _cryptoService.hashString(value: newEmail);
+    final dynamicLink = await _deepLinkService.createOpportunityVerifyDeepLink(
+      id: id,
+      hash: hash.toString(),
     );
-
-    final dynamicLink = await FirebaseDynamicLinksPlatform.instance
-        .buildLink(dynamicLinkParams);
-    return dynamicLink;
-  }
-
-  Future<void> _sendVerificationEmail(String toEmail, Uri dynamicLink) async {
-    final sendEmailUrl = Uri.https(
-      'api.sendgrid.com',
-      '/v3/mail/send',
-    );
-
-    await http.post(
-      sendEmailUrl,
-      headers: {
-        'Authorization': 'Bearer ${dotenv.env['SENDGRID_API_KEY']}',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'personalizations': [
-          {
-            'to': [
-              {
-                'email': toEmail,
-              }
-            ],
-          }
-        ],
-        'from': {
-          'email': 'handinneedgsdc@gmail.com',
-          'name': 'The HandInNeed Team',
-        },
-        'subject': 'Volunteer Opportunity Hosting',
-        'content': [
-          {
-            'type': 'text/html',
-            'value': """
-              <style>
-                @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
-              </style>
-              <body style='margin: 0; font-family: Montserrat, Google Sans, sans-serif;'>
-                <div class='wrapper'>
-                  <div class='content' style='width: 100%; margin: auto; background: white; border-radius: 10px;'>
-                    <div class='banner' style='background: #1A75FF; padding: 10px 25px; color: white;'>
-                      <h1><span style='font-size: 40;'>🤝 </span>HandInNeed</h1>
-                    </div>
-                    <div class='content-body' style='background: #0050C7; color: white; padding: 25px;'>
-                      <h2>Your organization has been mentioned!<span style='font-size: 40;'> 👏</span></h2>
-                      <br/>
-                      <div class="text-box" style='background-color: white; color: black; padding: 40px; border-radius: 10px;'>
-                        <p>A user of our volunteer opportunity sharing app has decided to <b>share information of your upcoming opportunity</b>.</p>
-                        <p>
-                        In order to verify and manage attendees that register for this opportunity from our app, please install our app and sign up with this email. Next, verify this opportuity by going to the "Your Jobs" section and the "Your Hostings" tab on the top. Find the correct opportunity and press verify to complete the verification process.
-                        </p>
-                        <p>
-                          <b>If you prefer to use a different email for the account</b>, please provide your desired email by clicking the button below.
-                        </p>
-                        <a href="$dynamicLink">
-                          <button class='link-btn' style='background: #1573FF; color: white; border: 0; width: 200px; height: 50px; border-radius: 5px; font-size: 14px; margin: 30px 0; font-family: Montserrat, Google Sans, sans-serif;'>Transfer Opportunity</button>
-                        </a>
-                        <p>If you didn't organize an event, please disregard this email.</p>
-                        <br/>
-                        <p>
-                          Happy Volunteering,
-                        </p>
-                        <b style='font-size: 16;'>The HandInNeed Team</b>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </body>
-            """,
-          }
-        ],
-      }),
+    await _emailService.sendOpportunityVerificationEmail(
+      toEmail: newEmail,
+      dynamicLink: dynamicLink,
     );
   }
 }

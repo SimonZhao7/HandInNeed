@@ -1,15 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 // Firebase
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 // Auth
+import 'package:hand_in_need/services/cloud_storage/cloud_storage_service.dart';
 import 'package:hand_in_need/services/auth/auth_constants.dart';
 import 'package:hand_in_need/services/auth/auth_user.dart';
 // Util
 import 'package:share_plus/share_plus.dart';
-import 'package:uuid/uuid.dart';
 // Exceptions
 import 'auth_exceptions.dart';
 
@@ -17,6 +15,8 @@ class AuthService {
   static final AuthService _shared = AuthService.instance();
   AuthService.instance();
   factory AuthService() => _shared;
+
+  final _storageService = CloudStorageService();
 
   User get userDetails => FirebaseAuth.instance.currentUser!;
 
@@ -120,26 +120,8 @@ class AuthService {
 
     try {
       await user.updateEmail(email);
-      final ref = FirebaseStorage.instance.ref(
-        '$imagePath${const Uuid().v4()}-${image.name}',
-      );
-      final uploadState = ref.putFile(File(image.path));
-
-      uploadState.snapshotEvents.listen((TaskSnapshot event) async {
-        switch (event.state) {
-          case TaskState.paused:
-            break;
-          case TaskState.running:
-            break;
-          case TaskState.canceled:
-            break;
-          case TaskState.error:
-            break;
-          case TaskState.success:
-            final url = await ref.getDownloadURL();
-            await user.updatePhotoURL(url);
-        }
-      });
+      final imageUrl = await _storageService.uploadImage(selectedPhoto: image, path: imagePath);
+      await user.updatePhotoURL(imageUrl);
 
       await FirebaseFirestore.instance.collection(userCollectionName).add({
         userIdField: user.uid,
