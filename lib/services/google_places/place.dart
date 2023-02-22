@@ -4,8 +4,8 @@ import 'package:hand_in_need/services/google_places/fields.dart';
 class Place {
   final String placeId;
   final String address;
-  final String phoneNumber;
-  final String website;
+  final String? phoneNumber;
+  final String? website;
   final String name;
   final LatLng location;
 

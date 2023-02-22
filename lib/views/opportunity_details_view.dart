@@ -74,21 +74,25 @@ class OpportunityDetailsView extends StatelessWidget {
                     url: opportunity.url,
                     scheme: 'https',
                   ),
-                  const SizedBox(height: 15),
-                  LinkText(
-                    leading: 'Place Website: ',
-                    url: place.website,
-                    scheme: 'https',
-                  ),
-                  const SizedBox(height: 60),
+                  if (place.website != null) ...[
+                    const SizedBox(height: 15),
+                    LinkText(
+                      leading: 'Place Website: ',
+                      url: place.website ?? '',
+                      scheme: 'https',
+                    ),
+                  ],
+                  const SizedBox(height: 40),
                   Text('Contact Info', style: textStyle.headline3),
                   const SizedBox(height: 15),
-                  LinkText(
-                    leading: 'Phone Number: ',
-                    url: place.phoneNumber,
-                    scheme: 'tel',
-                  ),
-                  const SizedBox(height: 15),
+                  if (place.phoneNumber != null) ...[
+                    LinkText(
+                      leading: 'Phone Number: ',
+                      url: place.phoneNumber ?? '',
+                      scheme: 'tel',
+                    ),
+                    const SizedBox(height: 15),
+                  ],
                   LinkText(
                     leading: 'Email: ',
                     url: opportunity.organizationEmail,
