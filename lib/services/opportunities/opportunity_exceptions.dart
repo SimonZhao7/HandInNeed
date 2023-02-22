@@ -16,6 +16,8 @@ class NoStartTimeProvidedOpportunityException implements Exception {}
 
 class NoEndTimeProvidedOpportunityExcpeption implements Exception {}
 
+class InvalidStartTimeOpportunityException implements Exception {}
+
 class OutOfOrderTimesOpportunityException implements Exception {}
 
 class NoLocationProvidedOpportunityExcpetion implements Exception {}
@@ -25,3 +27,7 @@ class LocationNotFoundOpportunityException implements Exception {}
 class EmailNotChangedOpportunityException implements Exception {}
 
 class EmailsDoNotMatchOpportunityException implements Exception {}
+
+class DoesNotExistOpportunityException implements Exception {}
+
+class EmailMismatchOpportunityException implements Exception {}

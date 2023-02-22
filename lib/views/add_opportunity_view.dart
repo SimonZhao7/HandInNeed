@@ -230,6 +230,8 @@ class _AddOpportunityState extends State<AddOpportunity> {
         showErrorSnackbar(context, 'No start time provided');
       } else if (e is NoEndTimeProvidedOpportunityExcpeption) {
         showErrorSnackbar(context, 'No end time provided');
+      } else if (e is InvalidStartTimeOpportunityException) {
+        showErrorSnackbar(context, 'Invalid start time');
       } else if (e is OutOfOrderTimesOpportunityException) {
         showErrorSnackbar(
           context,

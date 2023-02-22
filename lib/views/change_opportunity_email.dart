@@ -23,7 +23,7 @@ class ChangeOpportunityEmailView extends StatefulWidget {
 
 class _ChangeOpportunityEmailViewState
     extends State<ChangeOpportunityEmailView> {
-  final OpportunityService _opportunityService = OpportunityService();
+  final _opportunityService = OpportunityService();
   late TextEditingController _email;
   late TextEditingController _confirmEmail;
 
@@ -77,10 +77,15 @@ class _ChangeOpportunityEmailViewState
                     id: widget.opportunityId,
                     newEmail: email,
                     confirmEmail: confirmEmail,
+                    hash: widget.emailHash,
                   );
                   navigator.pop();
                 } catch (e) {
-                  if (e is InvalidOrganizationEmailOpportunityException) {
+                  if (e is DoesNotExistOpportunityException ||
+                      e is EmailMismatchOpportunityException) {
+                    showErrorSnackbar(context, 'Invalid email url');
+                  } else if (e
+                      is InvalidOrganizationEmailOpportunityException) {
                     showErrorSnackbar(
                       context,
                       'Invalid Email',

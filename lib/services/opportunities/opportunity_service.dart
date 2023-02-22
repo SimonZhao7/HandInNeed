@@ -93,8 +93,17 @@ class OpportunityService {
       throw NoEndTimeProvidedOpportunityExcpeption();
     }
 
-    if (endTime.hour + endTime.minute / 60 <
-        startTime.hour + startTime.minute / 60) {
+    final startTimeHours = startTime.hour + startTime.minute / 60;
+    final endTimeHours = endTime.hour + endTime.minute / 60;
+    final now = DateTime.now();
+    final currDate = DateTime(now.year, now.month, now.day);
+    final nowHours = now.hour + now.minute / 60;
+
+    if (startDate == currDate && startTimeHours < nowHours) {
+      throw InvalidStartTimeOpportunityException();
+    }
+
+    if (endTimeHours < startTimeHours) {
       throw OutOfOrderTimesOpportunityException();
     }
 
@@ -141,7 +150,7 @@ class OpportunityService {
       websiteField: place.website,
       nameField: place.name,
     });
-    
+
     await _sendVerificationEmail(
       newEmail: organizationEmail,
       id: ref.id,
@@ -152,9 +161,21 @@ class OpportunityService {
     required String id,
     required String newEmail,
     required String confirmEmail,
+    required String hash,
   }) async {
-    final doc = db.doc(id);
-    final data = (await doc.get()).data()!;
+    final query = await db.where(FieldPath.documentId, isEqualTo: id).get();
+    if (query.docs.isEmpty) {
+      throw DoesNotExistOpportunityException();
+    }
+
+    final opportunity = Opportunity.fromFirebase(query.docs.first);
+
+    if (!_cryptoService.checkHash(
+      value: opportunity.organizationEmail,
+      hash: hash,
+    )) {
+      throw EmailMismatchOpportunityException();
+    }
 
     if (!isEmail(newEmail)) {
       throw InvalidOrganizationEmailOpportunityException();
@@ -164,11 +185,11 @@ class OpportunityService {
       throw EmailsDoNotMatchOpportunityException();
     }
 
-    if (newEmail == data[organizationEmailField]) {
+    if (newEmail == opportunity.organizationEmail) {
       throw EmailNotChangedOpportunityException();
     }
 
-    await doc.update({
+    await db.doc(id).update({
       organizationEmailField: newEmail,
     });
     await _sendVerificationEmail(
