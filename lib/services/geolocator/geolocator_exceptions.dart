@@ -1,0 +1,5 @@
+class LocationServiceDisabledGeolocatorException implements Exception {}
+
+class LocationPermissionDeniedGeolocatorException implements Exception {}
+
+class LocationPermissionDeniedForeverGeolocatorException implements Exception {}

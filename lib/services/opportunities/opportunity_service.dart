@@ -33,8 +33,10 @@ class OpportunityService {
 
   final db = FirebaseFirestore.instance.collection(collectionName);
 
-  Stream<List<Opportunity>> allOpportunities() =>
-      db.snapshots().map((s) => s.docs.map(Opportunity.fromFirebase).toList());
+  Stream<List<Opportunity>> allOpportunities() => db
+      .where(verifiedField, isEqualTo: true)
+      .snapshots()
+      .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
 
   Stream<List<Opportunity>> yourOpportunities() => db
       .where(userIdField, isEqualTo: _authService.userDetails.uid)

@@ -57,6 +57,7 @@ dependencies:
     url_launcher: ^6.1.9
     go_router: ^6.0.6
     firebase_dynamic_links: ^5.0.12
+    geolocator: ^9.0.2
 
 dev_dependencies:
     flutter_test:

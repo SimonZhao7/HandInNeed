@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_service.dart';
+import 'package:hand_in_need/views/home_content_view.dart';
 import 'package:hand_in_need/views/opportunity_tabs_view.dart';
 import 'package:hand_in_need/views/account_settings_view.dart';
 // Constants
@@ -19,13 +20,6 @@ class _HomeViewState extends State<HomeView> {
   final authService = AuthService();
   int _selectedIndex = 0;
 
-  final List<Widget> content = [
-    const Text('Home'),
-    const Text('Upcoming'),
-    const OpportunityTabsView(),
-    const AccountSettingsView(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,8 +27,15 @@ class _HomeViewState extends State<HomeView> {
         title: const Text('Home'),
         elevation: 0,
       ),
-      extendBody: true,
-      body: content[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: const [
+          HomeContentView(),
+          Text('Upcoming'),
+          OpportunityTabsView(),
+          AccountSettingsView(),
+        ],
+      ),
       bottomNavigationBar: BottomAppBar(
         notchMargin: 5,
         shape: const CircularNotchedRectangle(),
