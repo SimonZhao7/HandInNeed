@@ -109,7 +109,7 @@ class OpportunitiesList extends StatelessWidget {
                                 onPressed: () {
                                   context.pushNamed(
                                     viewOpportunity,
-                                    extra: opportunity,
+                                    params: {'id': opportunity.id},
                                   );
                                 },
                                 label: 'View',

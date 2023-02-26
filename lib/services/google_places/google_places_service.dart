@@ -37,12 +37,12 @@ class GooglePlacesService {
     throw UnableToFetchGooglePlacesException();
   }
 
-  Future<Place> fetchPlace(AutocompleteResult location) async {
+  Future<Place> fetchPlace(String? placeId) async {
     final placesUrl = Uri.https(
       domainName,
       pathName,
       {
-        placeIdField: location.placeId ?? '',
+        placeIdField: placeId ?? '',
         fields: [
           placeIdField,
           formattedAddressField,
@@ -62,5 +62,9 @@ class GooglePlacesService {
       return Place.fromJSON(body[resultField]);
     }
     throw UnableToFetchGooglePlacesException();
+  }
+
+  Future<Place> fetchPlaceFromAutoComplete(AutocompleteResult location) async {
+    return await fetchPlace(location.placeId);
   }
 }

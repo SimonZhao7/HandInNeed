@@ -38,7 +38,7 @@ class _HomeContentViewState extends State<HomeContentView> {
               infoWindow: InfoWindow(
                 title: o.title,
                 onTap: () {
-                  context.pushNamed(viewOpportunity, extra: o);
+                  context.pushNamed(viewOpportunity, params: {'id': o.id});
                 },
               ),
               position: o.place.location,

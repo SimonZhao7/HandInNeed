@@ -59,64 +59,20 @@ class OpportunityService {
     required TimeOfDay? endTime,
     required AutocompleteResult? location,
   }) async {
-    if (title.trim().length < 8) {
-      throw TitleTooShortOpportunityException();
-    }
+    _validateTitle(value: title);
+    _validateUrl(value: url);
+    _validateOrganizationEmail(value: organizationEmail);
+    _validatePhoto(value: selectedPhoto);
+    final formattedDates = _validateTimes(
+      startDate: startDate,
+      startTime: startTime,
+      endTime: endTime,
+    );
+    _validateLocation(value: location);
 
-    if (url.trim().isEmpty) {
-      throw NoUrlProvidedOpportunityException();
-    }
-
-    if (!isURL(url, requireProtocol: true, requireTld: true)) {
-      throw InvalidUrlOpportunityException();
-    }
-
-    if (organizationEmail.trim().isEmpty) {
-      throw NoOrganizationEmailProvidedOpportunityException();
-    }
-
-    if (!isEmail(organizationEmail)) {
-      throw InvalidOrganizationEmailOpportunityException();
-    }
-
-    if (selectedPhoto == null) {
-      throw NoPhotoProvidedOpportunityException();
-    }
-
-    if (startDate == null) {
-      throw NoStartDateProvidedOpportunityException();
-    }
-
-    if (startTime == null) {
-      throw NoStartTimeProvidedOpportunityException();
-    }
-
-    if (endTime == null) {
-      throw NoEndTimeProvidedOpportunityExcpeption();
-    }
-
-    final startTimeHours = startTime.hour + startTime.minute / 60;
-    final endTimeHours = endTime.hour + endTime.minute / 60;
-    final now = DateTime.now();
-    final currDate = DateTime(now.year, now.month, now.day);
-    final nowHours = now.hour + now.minute / 60;
-
-    if (startDate == currDate && startTimeHours < nowHours) {
-      throw InvalidStartTimeOpportunityException();
-    }
-
-    if (endTimeHours < startTimeHours) {
-      throw OutOfOrderTimesOpportunityException();
-    }
-
-    if (location == null) {
-      throw NoLocationProvidedOpportunityExcpetion();
-    }
-
-    final place = await _placesService.fetchPlace(location);
-
+    final place = await _placesService.fetchPlaceFromAutoComplete(location!);
     final imageUrl = await _storageService.uploadImage(
-      selectedPhoto: selectedPhoto,
+      selectedPhoto: selectedPhoto!,
       path: imagesPath,
     );
 
@@ -129,18 +85,8 @@ class OpportunityService {
       attendeesField: [],
       verifiedField: false,
       startDateField: startDate,
-      startTimeField: startDate.add(
-        Duration(
-          hours: startTime.hour,
-          minutes: startTime.minute,
-        ),
-      ),
-      endTimeField: startDate.add(
-        Duration(
-          hours: endTime.hour,
-          minutes: endTime.minute,
-        ),
-      ),
+      startTimeField: formattedDates[startTimeField],
+      endTimeField: formattedDates[endTimeField],
       imageField: imageUrl,
       createdAtField: FieldValue.serverTimestamp(),
       // Place
@@ -157,6 +103,68 @@ class OpportunityService {
       newEmail: organizationEmail,
       id: ref.id,
     );
+  }
+
+  Stream<Opportunity> getOpportunityStream(String id) {
+    return db
+        .where(FieldPath.documentId, isEqualTo: id)
+        .snapshots()
+        .map((s) => Opportunity.fromFirebase(s.docs[0]));
+  }
+
+  Future<void> updateOpportunity({
+    required String id,
+    required String title,
+    required String description,
+    required String url,
+    required String organizationEmail,
+    required XFile? selectedPhoto,
+    required DateTime? startDate,
+    required TimeOfDay? startTime,
+    required TimeOfDay? endTime,
+    required AutocompleteResult? location,
+  }) async {
+    final opportunity = Opportunity.fromFirebase(
+      (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs.first,
+    );
+    final Map<String, Object?> updateMap = {};
+
+    _validateTitle(value: title);
+    updateMap[titleField] = title;
+    _validateUrl(value: url);
+    updateMap[urlField] = url;
+    _validateOrganizationEmail(value: organizationEmail);
+    updateMap[organizationEmailField] = organizationEmail;
+    _validatePhoto(skipNull: true, value: selectedPhoto);
+    final formattedDates = _validateTimes(
+      opportunity: opportunity,
+      startDate: startDate,
+      startTime: startTime,
+      endTime: endTime,
+    );
+    updateMap[startDateField] = formattedDates[startDateField];
+    updateMap[startTimeField] = formattedDates[startTimeField];
+    updateMap[endTimeField] = formattedDates[endTimeField];
+    _validateLocation(skipNull: true, value: location);
+    if (location != null) {
+      final place = await _placesService.fetchPlaceFromAutoComplete(location);
+      updateMap[placeIdField] = place.placeId;
+      updateMap[addressField] = place.address;
+      updateMap[phoneNumberField] = place.phoneNumber;
+      updateMap[latField] = place.location.latitude;
+      updateMap[lngField] = place.location.longitude;
+      updateMap[websiteField] = place.website;
+      updateMap[nameField] = place.name;
+    }
+
+    if (selectedPhoto != null) {
+      final photoURL = await _storageService.uploadImage(
+        selectedPhoto: selectedPhoto,
+        path: imagesPath,
+      );
+      updateMap[imageField] = photoURL;
+    }
+    await db.doc(id).update(updateMap);
   }
 
   Future<void> transferOwnership({
@@ -219,5 +227,100 @@ class OpportunityService {
       toEmail: newEmail,
       dynamicLink: dynamicLink,
     );
+  }
+
+  void _validateTitle({required String value}) {
+    if (value.trim().length < 8) {
+      throw TitleTooShortOpportunityException();
+    }
+  }
+
+  void _validateUrl({required String value}) {
+    if (value.trim().isEmpty) {
+      throw NoUrlProvidedOpportunityException();
+    }
+
+    if (!isURL(value, requireProtocol: true, requireTld: true)) {
+      throw InvalidUrlOpportunityException();
+    }
+  }
+
+  void _validateOrganizationEmail({required String value}) {
+    if (value.trim().isEmpty) {
+      throw NoOrganizationEmailProvidedOpportunityException();
+    }
+
+    if (!isEmail(value)) {
+      throw InvalidOrganizationEmailOpportunityException();
+    }
+  }
+
+  void _validatePhoto({skipNull = false, required XFile? value}) {
+    if (value == null && !skipNull) {
+      throw NoPhotoProvidedOpportunityException();
+    }
+  }
+
+  Map<String, DateTime> _validateTimes({
+    Opportunity? opportunity,
+    required DateTime? startDate,
+    required TimeOfDay? startTime,
+    required TimeOfDay? endTime,
+  }) {
+    if (opportunity == null) {
+      if (startDate == null) {
+        throw NoStartDateProvidedOpportunityException();
+      }
+
+      if (startTime == null) {
+        throw NoStartTimeProvidedOpportunityException();
+      }
+
+      if (endTime == null) {
+        throw NoEndTimeProvidedOpportunityExcpeption();
+      }
+    } else {
+      startDate = startDate ?? opportunity.startDate;
+      startTime = startTime ?? TimeOfDay.fromDateTime(opportunity.startDate);
+      endTime = endTime ?? TimeOfDay.fromDateTime(opportunity.endTime);
+    }
+    final now = DateTime.now();
+    final currDate = DateTime(now.year, now.month, now.day);
+    final startTimeHours = startTime.hour + startTime.minute / 60;
+    final endTimeHours = endTime.hour + endTime.minute / 60;
+    final nowHours = now.hour + now.minute / 60;
+
+    if (startDate == currDate && startTimeHours < nowHours) {
+      throw InvalidStartTimeOpportunityException();
+    }
+
+    if (endTimeHours < startTimeHours) {
+      throw OutOfOrderTimesOpportunityException();
+    }
+
+    return {
+      startDateField: startDate,
+      startTimeField: startDate.add(
+        Duration(
+          hours: startTime.hour,
+          minutes: startTime.minute,
+        ),
+      ),
+      endTimeField: startDate.add(
+        Duration(
+          hours: endTime.hour,
+          minutes: endTime.minute,
+        ),
+      ),
+    };
+  }
+
+  void _validateLocation({
+    skipNull = false,
+    required AutocompleteResult? value,
+  }) {
+    if (value == null && !skipNull) {
+      throw NoLocationProvidedOpportunityExcpetion();
+    }
   }
 }

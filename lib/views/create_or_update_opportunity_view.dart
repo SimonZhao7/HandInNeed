@@ -9,13 +9,15 @@ import '../services/google_places/autocomplete_result.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
 import 'package:image_picker/image_picker.dart';
+import '../services/opportunities/opportunity.dart';
 import '../widgets/button.dart';
 // Util
 import 'package:intl/intl.dart';
 import 'dart:io';
 
 class AddOpportunity extends StatefulWidget {
-  const AddOpportunity({super.key});
+  final Opportunity? opportunity;
+  const AddOpportunity({super.key, this.opportunity});
 
   @override
   State<AddOpportunity> createState() => _AddOpportunityState();
@@ -41,6 +43,25 @@ class _AddOpportunityState extends State<AddOpportunity> {
     _url = TextEditingController();
     _organizationEmail = TextEditingController();
     _address = TextEditingController();
+
+    final opportunity = widget.opportunity;
+    if (opportunity != null) {
+      final place = opportunity.place;
+      final autoLocation = AutocompleteResult(
+        description: '${place.name}, ${place.address}',
+        placeId: place.placeId,
+      );
+
+      _title.text = opportunity.title;
+      _description.text = opportunity.description;
+      _url.text = opportunity.url;
+      _organizationEmail.text = opportunity.organizationEmail;
+      startDate = opportunity.startDate;
+      startTime = TimeOfDay.fromDateTime(opportunity.startTime);
+      endTime = TimeOfDay.fromDateTime(opportunity.endTime);
+      location = autoLocation;
+      _address.text = autoLocation.description;
+    }
     super.initState();
   }
 
@@ -58,10 +79,11 @@ class _AddOpportunityState extends State<AddOpportunity> {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat.yMd();
     final label = Theme.of(context).textTheme.labelMedium;
+    final editing = widget.opportunity != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Opportunity'),
+        title: Text('${editing ? 'Edit' : 'Add'} Opportunity'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(30),
@@ -94,6 +116,16 @@ class _AddOpportunityState extends State<AddOpportunity> {
                 ),
                 const SizedBox(height: 10),
               ],
+              if (editing && selectedPhoto == null) ...[
+                SizedBox(
+                  height: 250,
+                  width: double.infinity,
+                  child: Image.network(
+                    widget.opportunity!.image,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              ],
               Text('Image', style: label),
               Button(
                 onPressed: () async {
@@ -103,6 +135,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
                   );
 
                   if (photo == null) return;
+                  // Convert to and store bytes
                   setState(() {
                     selectedPhoto = photo;
                   });
@@ -189,6 +222,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
   }
 
   void _handleSubmit() async {
+    final editing = widget.opportunity != null;
     final title = _title.text;
     final description = _description.text;
     final url = _url.text;
@@ -196,17 +230,32 @@ class _AddOpportunityState extends State<AddOpportunity> {
     final navigator = Navigator.of(context);
 
     try {
-      await _opportunityService.addOpportunity(
-        title: title,
-        description: description,
-        url: url,
-        organizationEmail: organizationEmail,
-        selectedPhoto: selectedPhoto,
-        startDate: startDate,
-        startTime: startTime,
-        endTime: endTime,
-        location: location,
-      );
+      if (editing) {
+        await _opportunityService.updateOpportunity(
+          id: widget.opportunity!.id,
+          title: title,
+          description: description,
+          url: url,
+          organizationEmail: organizationEmail,
+          selectedPhoto: selectedPhoto,
+          startDate: startDate,
+          startTime: startTime,
+          endTime: endTime,
+          location: location,
+        );
+      } else {
+        await _opportunityService.addOpportunity(
+          title: title,
+          description: description,
+          url: url,
+          organizationEmail: organizationEmail,
+          selectedPhoto: selectedPhoto,
+          startDate: startDate,
+          startTime: startTime,
+          endTime: endTime,
+          location: location,
+        );
+      }
       navigator.pop();
     } catch (e) {
       if (e is TitleTooShortOpportunityException) {

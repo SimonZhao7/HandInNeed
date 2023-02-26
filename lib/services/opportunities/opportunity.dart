@@ -52,7 +52,9 @@ class Opportunity {
       startDate: (data[startDateField] as Timestamp).toDate(),
       startTime: (data[startTimeField] as Timestamp).toDate(),
       endTime: (data[endTimeField] as Timestamp).toDate(),
-      createdAt: (data[createdAtField] as Timestamp).toDate(),
+      createdAt: data[createdAtField] != null
+          ? (data[createdAtField] as Timestamp).toDate()
+          : DateTime.now(),
       attendees: (data[attendeesField] as List)
           .map(
             (e) => e.toString(),
