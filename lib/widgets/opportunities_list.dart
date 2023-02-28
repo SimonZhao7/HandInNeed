@@ -116,7 +116,13 @@ class OpportunitiesList extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 20),
-                            Expanded(flex: 1, child: _renderButton(opportunity))
+                            Expanded(
+                              flex: 1,
+                              child: _renderButton(
+                                opportunity,
+                                context,
+                              ),
+                            ),
                           ],
                         )
                       ],
@@ -136,11 +142,18 @@ class OpportunitiesList extends StatelessWidget {
     );
   }
 
-  Widget _renderButton(Opportunity opportunity) {
+  Widget _renderButton(Opportunity opportunity, BuildContext context) {
     if (type == OpportunityViewType.manage) {
       return opportunity.verified
           ? Button(
-              onPressed: () {},
+              onPressed: () {
+                context.pushNamed(
+                  manageAttendees,
+                  params: {
+                    'id': opportunity.id,
+                  },
+                );
+              },
               label: 'Manage',
             )
           : Button(

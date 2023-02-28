@@ -16,25 +16,25 @@ class AuthService {
   AuthService.instance();
   factory AuthService() => _shared;
 
+  final db = FirebaseFirestore.instance.collection(userCollectionName);
   final _storageService = CloudStorageService();
 
   User get userDetails => FirebaseAuth.instance.currentUser!;
 
-  Future<AuthUser?> currentUser() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return null;
+  Future<AuthUser> currentUser() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
 
-    final id = user.uid;
-    final query = await FirebaseFirestore.instance
-        .collection(userCollectionName)
-        .where(userIdField, isEqualTo: id)
-        .get();
+      final id = user!.uid;
+      final query = await FirebaseFirestore.instance
+          .collection(userCollectionName)
+          .where(userIdField, isEqualTo: id)
+          .get();
 
-    if (query.docs.isEmpty) {
-      return null;
-    } else {
       final data = query.docs[0];
       return AuthUser.fromFirebase(data);
+    } catch (_) {
+      throw NotSignedInAuthException();
     }
   }
 
@@ -120,7 +120,10 @@ class AuthService {
 
     try {
       await user.updateEmail(email);
-      final imageUrl = await _storageService.uploadImage(selectedPhoto: image, path: imagePath);
+      final imageUrl = await _storageService.uploadImage(
+        selectedPhoto: image,
+        path: imagePath,
+      );
       await user.updatePhotoURL(imageUrl);
 
       await FirebaseFirestore.instance.collection(userCollectionName).add({
@@ -144,5 +147,26 @@ class AuthService {
     } catch (e) {
       throw GenericAuthException();
     }
+  }
+
+  void manageJoinStatus(String opportunityId) async {
+    final user = await currentUser();
+    final opportunities = user.opportunities;
+
+    if (opportunities.contains(opportunityId)) {
+      opportunities.remove(opportunityId);
+    } else {
+      opportunities.add(opportunityId);
+    }
+    await db.doc(user.id).update({
+      opportunitiesField: opportunities,
+    });
+  }
+
+  Stream<List<AuthUser>> getUserListStream(opportunityId) {
+    return db
+        .where(opportunitiesField, arrayContains: opportunityId)
+        .snapshots()
+        .map((s) => s.docs.map(AuthUser.fromFirebase).toList());
   }
 }

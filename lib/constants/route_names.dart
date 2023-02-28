@@ -5,4 +5,5 @@ const home = 'home';
 const addOpportunity = 'add-opportunity';
 const viewOpportunity = 'opportunity-details';
 const inputAddress = 'address-input';
+const manageAttendees = 'opportunity-manage';
 const changeOpportunityEmail = 'change-opportunity-email';

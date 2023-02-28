@@ -2,6 +2,8 @@ class AuthException implements Exception {}
 
 class GenericAuthException implements AuthException {}
 
+class NotSignedInAuthException implements AuthException {}
+
 // Phone Verification
 class InvalidPhoneNumberAuthException implements AuthException {}
 

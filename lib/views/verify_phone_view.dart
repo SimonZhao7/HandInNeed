@@ -5,8 +5,6 @@ import 'package:hand_in_need/services/auth/auth_service.dart';
 import 'package:hand_in_need/widgets/button.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
-// Services
-import '../services/auth/auth_user.dart';
 // Constants
 import 'package:hand_in_need/constants/route_names.dart';
 // Util
@@ -83,13 +81,11 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
                         verificationId: widget.verificationId,
                         verificationCode: verificationCode,
                       );
-
-                      final AuthUser? currentUser =
-                          await _authService.currentUser();
-                      if (currentUser == null) {
-                        navigator.pushNamed(accountSetup);
-                      } else {
+                      try {
+                        await _authService.currentUser();
                         navigator.goNamed(home);
+                      } on NotSignedInAuthException {
+                        navigator.pushNamed(accountSetup);
                       }
                     } on AuthException catch (e) {
                       if (e is InvalidVerificationCodeAuthException) {

@@ -127,6 +127,9 @@ class OpportunityDetailsView extends StatelessWidget {
                                     opportunityService.manageJoinStatus(
                                       opportunity.id,
                                     );
+                                    authService.manageJoinStatus(
+                                      opportunity.id,
+                                    );
                                   },
                                   label: opportunity.attendees
                                           .contains(authService.userDetails.uid)

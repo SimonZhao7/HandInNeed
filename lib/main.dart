@@ -9,6 +9,7 @@ import 'firebase_options.dart';
 import 'package:hand_in_need/views/create_or_update_opportunity_view.dart';
 import 'package:hand_in_need/views/change_opportunity_email.dart';
 import 'package:hand_in_need/views/opportunity_details_view.dart';
+import 'package:hand_in_need/views/manage_attendees_view.dart';
 import 'package:hand_in_need/views/address_search_view.dart';
 import 'package:hand_in_need/views/account_setup_view.dart';
 import 'package:hand_in_need/views/verify_phone_view.dart';
@@ -77,6 +78,13 @@ final GoRouter _router = GoRouter(
       path: '/opportunities/details/:id',
       name: viewOpportunity,
       builder: (context, state) => OpportunityDetailsView(
+        opportunityId: state.params['id']!,
+      ),
+    ),
+    GoRoute(
+      path: '/opportunties/:id/manage',
+      name: manageAttendees,
+      builder: (context, state) => ManageAttendeesView(
         opportunityId: state.params['id']!,
       ),
     ),
