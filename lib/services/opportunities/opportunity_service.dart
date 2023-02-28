@@ -167,6 +167,10 @@ class OpportunityService {
     await db.doc(id).update(updateMap);
   }
 
+  Future<void> deleteOpportunity(String id) async {
+    await db.doc(id).delete();
+  }
+
   Future<void> transferOwnership({
     required String id,
     required String newEmail,

@@ -11,7 +11,11 @@ import 'package:hand_in_need/widgets/input.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/opportunities/opportunity.dart';
 import '../widgets/button.dart';
+// Constants
+import 'package:hand_in_need/constants/route_names.dart';
+import 'package:hand_in_need/constants/colors.dart';
 // Util
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 
@@ -213,7 +217,17 @@ class _AddOpportunityState extends State<AddOpportunity> {
                 },
               ),
               const SizedBox(height: 10),
-              Button(onPressed: _handleSubmit, label: 'Submit')
+              Button(
+                  onPressed: _handleSubmit,
+                  label: editing ? 'Update' : 'Submit'),
+              if (editing) ...[
+                const SizedBox(height: 10),
+                Button(
+                  onPressed: _showDeleteDialog,
+                  label: 'Delete',
+                  backgroundColor: negativeRed,
+                ),
+              ]
             ],
           ),
         ],
@@ -297,6 +311,50 @@ class _AddOpportunityState extends State<AddOpportunity> {
       } else {
         showErrorSnackbar(context, 'Something went wrong');
       }
+    }
+  }
+
+  void _showDeleteDialog() async {
+    final value = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text(
+                'Are you sure you want to delete this opportunity?',
+              ),
+              actions: [
+                Row(children: [
+                  Expanded(
+                    flex: 1,
+                    child: Button(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      label: 'Yes',
+                      backgroundColor: negativeRed,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 1,
+                    child: Button(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      label: 'No',
+                    ),
+                  ),
+                ]),
+              ],
+            );
+          },
+        ) ??
+        false;
+    if (value) {
+      _opportunityService
+          .deleteOpportunity(
+            widget.opportunity!.id,
+          )
+          .then(
+            (_) => context.goNamed(home),
+          );
     }
   }
 
