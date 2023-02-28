@@ -123,10 +123,14 @@ class OpportunityDetailsView extends StatelessWidget {
                                   label: 'Edit',
                                 )
                               : Button(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    opportunityService.manageJoinStatus(
+                                      opportunity.id,
+                                    );
+                                  },
                                   label: opportunity.attendees
                                           .contains(authService.userDetails.uid)
-                                      ? 'Joined'
+                                      ? 'Leave'
                                       : 'Join',
                                 )
                         ],

@@ -124,9 +124,7 @@ class OpportunityService {
     required TimeOfDay? endTime,
     required AutocompleteResult? location,
   }) async {
-    final opportunity = Opportunity.fromFirebase(
-      (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs.first,
-    );
+    final opportunity = await _getOpportunity(id);
     final Map<String, Object?> updateMap = {};
 
     _validateTitle(value: title);
@@ -169,6 +167,18 @@ class OpportunityService {
 
   Future<void> deleteOpportunity(String id) async {
     await db.doc(id).delete();
+  }
+
+  Future<void> manageJoinStatus(String id) async {
+    final attendees = (await _getOpportunity(id)).attendees;
+    final userId = _authService.userDetails.uid;
+
+    if (attendees.contains(userId)) {
+      attendees.remove(userId);
+    } else {
+      attendees.add(userId);
+    }
+    await db.doc(id).update({attendeesField: attendees});
   }
 
   Future<void> transferOwnership({
@@ -216,6 +226,12 @@ class OpportunityService {
     await db.doc(id).update({
       'verified': true,
     });
+  }
+
+  Future<Opportunity> _getOpportunity(String id) async {
+    return Opportunity.fromFirebase(
+      (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs.first,
+    );
   }
 
   Future<void> _sendVerificationEmail({
