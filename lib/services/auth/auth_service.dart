@@ -23,12 +23,10 @@ class AuthService {
 
   Future<AuthUser> currentUser() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-
-      final id = user!.uid;
+      final user = FirebaseAuth.instance.currentUser!;
       final query = await FirebaseFirestore.instance
           .collection(userCollectionName)
-          .where(userIdField, isEqualTo: id)
+          .where(userIdField, isEqualTo: user.uid)
           .get();
 
       final data = query.docs[0];
@@ -129,9 +127,11 @@ class AuthService {
       await FirebaseFirestore.instance.collection(userCollectionName).add({
         userIdField: user.uid,
         userNamefield: userName,
+        emailField: email,
         firstNameField: firstName,
         lastNameField: lastName,
         descriptionField: description,
+        displayImageField: imageUrl,
         hoursWorkedField: 0.0,
         opportunitiesField: [],
       });
@@ -149,8 +149,12 @@ class AuthService {
     }
   }
 
-  void manageJoinStatus(String opportunityId) async {
-    final user = await currentUser();
+  Future<void> manageJoinStatus({
+    required String opportunityId,
+    required String userId,
+  }) async {
+    final query = await db.where(userIdField, isEqualTo: userId).get();
+    final user = AuthUser.fromFirebase(query.docs[0]);
     final opportunities = user.opportunities;
 
     if (opportunities.contains(opportunityId)) {

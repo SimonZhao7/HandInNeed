@@ -125,10 +125,12 @@ class OpportunityDetailsView extends StatelessWidget {
                               : Button(
                                   onPressed: () {
                                     opportunityService.manageJoinStatus(
-                                      opportunity.id,
+                                      opportunityId: opportunity.id,
+                                      userId: authService.userDetails.uid,
                                     );
                                     authService.manageJoinStatus(
-                                      opportunity.id,
+                                      opportunityId: opportunity.id,
+                                      userId: authService.userDetails.uid,
                                     );
                                   },
                                   label: opportunity.attendees

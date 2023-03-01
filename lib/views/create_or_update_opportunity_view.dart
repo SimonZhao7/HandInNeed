@@ -5,6 +5,7 @@ import 'package:hand_in_need/services/opportunities/opportunity_exceptions.dart'
 import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
 import 'package:hand_in_need/views/address_search_view.dart';
 // Widgets
+import 'package:hand_in_need/widgets/dialogs/delete_confirmation.dart';
 import '../services/google_places/autocomplete_result.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
@@ -315,46 +316,14 @@ class _AddOpportunityState extends State<AddOpportunity> {
   }
 
   void _showDeleteDialog() async {
-    final value = await showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text(
-                'Are you sure you want to delete this opportunity?',
-              ),
-              actions: [
-                Row(children: [
-                  Expanded(
-                    flex: 1,
-                    child: Button(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      label: 'Yes',
-                      backgroundColor: negativeRed,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 1,
-                    child: Button(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      label: 'No',
-                    ),
-                  ),
-                ]),
-              ],
-            );
-          },
-        ) ??
-        false;
+    final value = await showDeleteConfirmationDialog(
+      context,
+      'Are you sure you want to delete this opportunity?',
+    ) ?? false;
     if (value) {
       _opportunityService
-          .deleteOpportunity(
-            widget.opportunity!.id,
-          )
-          .then(
-            (_) => context.goNamed(home),
-          );
+          .deleteOpportunity(widget.opportunity!.id)
+          .then((_) => context.goNamed(home));
     }
   }
 

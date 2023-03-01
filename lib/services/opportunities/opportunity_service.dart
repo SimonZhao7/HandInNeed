@@ -169,16 +169,17 @@ class OpportunityService {
     await db.doc(id).delete();
   }
 
-  Future<void> manageJoinStatus(String id) async {
-    final attendees = (await _getOpportunity(id)).attendees;
-    final userId = _authService.userDetails.uid;
-
+  Future<void> manageJoinStatus({
+    required String opportunityId,
+    required String userId,
+  }) async {
+    final attendees = (await _getOpportunity(opportunityId)).attendees;
     if (attendees.contains(userId)) {
       attendees.remove(userId);
     } else {
       attendees.add(userId);
     }
-    await db.doc(id).update({attendeesField: attendees});
+    await db.doc(opportunityId).update({attendeesField: attendees});
   }
 
   Future<void> transferOwnership({

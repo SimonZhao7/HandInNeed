@@ -1,11 +1,11 @@
 // Firebase
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 // Constants
 import 'auth_constants.dart';
 
 class AuthUser {
   final String id;
+  final String userId;
   final String email;
   final String firstName;
   final String lastName;
@@ -17,6 +17,7 @@ class AuthUser {
 
   const AuthUser({
     required this.id,
+    required this.userId,
     required this.email,
     required this.firstName,
     required this.lastName,
@@ -32,17 +33,17 @@ class AuthUser {
   ) {
     final id = snapshot.id;
     final data = snapshot.data();
-    final user = FirebaseAuth.instance.currentUser!;
     final List<dynamic> opportunities = data[opportunitiesField];
 
     return AuthUser(
       id: id,
-      email: user.email!,
+      userId: data[userIdField],
+      email: data[emailField],
       firstName: data[firstNameField],
       lastName: data[lastNameField],
       userName: data[userNamefield],
       description: data[descriptionField],
-      displayImage: user.photoURL!,
+      displayImage: data[displayImageField],
       hoursWorked: data[hoursWorkedField] == 0 ? 0.0 : data[hoursWorkedField],
       opportunities: opportunities.map((o) => o.toString()).toList(),
     );
