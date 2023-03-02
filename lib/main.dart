@@ -16,6 +16,7 @@ import 'package:hand_in_need/views/verify_phone_view.dart';
 import 'package:hand_in_need/views/register_view.dart';
 import 'package:hand_in_need/views/home_view.dart';
 // Services
+import 'package:hand_in_need/services/auth/auth_constants.dart';
 import 'services/opportunities/opportunity.dart';
 // Constants
 import 'package:hand_in_need/constants/route_names.dart';
@@ -159,8 +160,8 @@ class Home extends StatelessWidget {
       return const RegisterView();
     }
     final userData = FirebaseFirestore.instance
-        .collection('users')
-        .where('user_id', isEqualTo: user.uid)
+        .collection(userCollectionName)
+        .where(FieldPath.documentId, isEqualTo: user.uid)
         .get();
     return FutureBuilder(
       future: userData,

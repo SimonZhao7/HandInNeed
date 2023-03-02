@@ -24,10 +24,8 @@ class AuthService {
   Future<AuthUser> currentUser() async {
     try {
       final user = FirebaseAuth.instance.currentUser!;
-      final query = await FirebaseFirestore.instance
-          .collection(userCollectionName)
-          .where(userIdField, isEqualTo: user.uid)
-          .get();
+      final query =
+          await db.where(FieldPath.documentId, isEqualTo: user.uid).get();
 
       final data = query.docs[0];
       return AuthUser.fromFirebase(data);
@@ -124,8 +122,7 @@ class AuthService {
       );
       await user.updatePhotoURL(imageUrl);
 
-      await FirebaseFirestore.instance.collection(userCollectionName).add({
-        userIdField: user.uid,
+      await db.doc(user.uid).set({
         userNamefield: userName,
         emailField: email,
         firstNameField: firstName,
@@ -153,7 +150,7 @@ class AuthService {
     required String opportunityId,
     required String userId,
   }) async {
-    final query = await db.where(userIdField, isEqualTo: userId).get();
+    final query = await db.where(FieldPath.documentId, isEqualTo: userId).get();
     final user = AuthUser.fromFirebase(query.docs[0]);
     final opportunities = user.opportunities;
 

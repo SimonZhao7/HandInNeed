@@ -5,7 +5,6 @@ import 'auth_constants.dart';
 
 class AuthUser {
   final String id;
-  final String userId;
   final String email;
   final String firstName;
   final String lastName;
@@ -17,7 +16,6 @@ class AuthUser {
 
   const AuthUser({
     required this.id,
-    required this.userId,
     required this.email,
     required this.firstName,
     required this.lastName,
@@ -37,7 +35,6 @@ class AuthUser {
 
     return AuthUser(
       id: id,
-      userId: data[userIdField],
       email: data[emailField],
       firstName: data[firstNameField],
       lastName: data[lastNameField],

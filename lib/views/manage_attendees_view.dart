@@ -59,11 +59,11 @@ class ManageAttendeesView extends StatelessWidget {
                               if (value) {
                                 await opportunityService.manageJoinStatus(
                                   opportunityId: opportunityId,
-                                  userId: user.userId,
+                                  userId: user.id,
                                 );
                                 await authService.manageJoinStatus(
                                   opportunityId: opportunityId,
-                                  userId: user.userId,
+                                  userId: user.id,
                                 );
                               }
                             },
