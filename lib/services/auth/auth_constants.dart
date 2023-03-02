@@ -7,5 +7,6 @@ const emailField = 'email';
 const descriptionField = 'description';
 const hoursWorkedField = 'hours_worked';
 const opportunitiesField = 'opportunities';
+const attendedField = 'attended';
 const displayImageField = 'display_image';
 const imagePath = 'profile_images';

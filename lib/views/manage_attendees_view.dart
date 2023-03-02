@@ -35,6 +35,7 @@ class ManageAttendeesView extends StatelessWidget {
               return ListView.builder(
                 itemBuilder: (context, index) {
                   final user = users[index];
+                  final attendConfirm = user.attended.contains(opportunityId);
                   return Container(
                     decoration: const BoxDecoration(
                       color: Color(white),
@@ -73,32 +74,56 @@ class ManageAttendeesView extends StatelessWidget {
                             flex: 1,
                           ),
                           SlidableAction(
-                            onPressed: (context) {},
-                            label: 'Confirm',
-                            icon: Icons.check_box,
-                            backgroundColor: const Color(positiveGreen),
+                            onPressed: (context) async {
+                              await authService.manageAttendedStatus(
+                                opportunityId: opportunityId,
+                                userId: user.id,
+                              );
+                            },
+                            label: attendConfirm ? 'Unconfirm' : 'Confirm',
+                            icon: attendConfirm
+                                ? Icons.check_box_outline_blank
+                                : Icons.check_box,
+                            backgroundColor: attendConfirm
+                                ? const Color(mediumGray)
+                                : const Color(positiveGreen),
                             flex: 1,
                           ),
                         ],
                       ),
                       child: ListTile(
-                        contentPadding: const EdgeInsets.all(10),
-                        tileColor: const Color(white),
-                        leading: SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: FadeInImage.memoryNetwork(
-                            image: user.displayImage,
-                            placeholder: kTransparentImage,
-                            fit: BoxFit.cover,
+                          contentPadding: const EdgeInsets.all(10),
+                          tileColor: const Color(white),
+                          leading: SizedBox(
+                            width: 50,
+                            height: 50,
+                            child: FadeInImage.memoryNetwork(
+                              image: user.displayImage,
+                              placeholder: kTransparentImage,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        ),
-                        title: Text(
-                          '${user.firstName} ${user.lastName}',
-                          style: Theme.of(context).textTheme.headline3,
-                        ),
-                        subtitle: Text(user.email),
-                      ),
+                          title: Text(
+                            '${user.firstName} ${user.lastName}',
+                            style: Theme.of(context).textTheme.headline3,
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(user.email),
+                              Chip(
+                                backgroundColor: attendConfirm
+                                    ? const Color(positiveGreen)
+                                    : const Color(negativeRed),
+                                labelStyle: const TextStyle(
+                                  color: Color(white),
+                                ),
+                                label: Text(
+                                  attendConfirm ? 'Confirmed' : 'Unconfirmed',
+                                ),
+                              ),
+                            ],
+                          )),
                     ),
                   );
                 },

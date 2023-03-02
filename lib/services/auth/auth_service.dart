@@ -131,6 +131,7 @@ class AuthService {
         displayImageField: imageUrl,
         hoursWorkedField: 0.0,
         opportunitiesField: [],
+        attendedField: [],
       });
       await user.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
@@ -161,6 +162,22 @@ class AuthService {
     }
     await db.doc(user.id).update({
       opportunitiesField: opportunities,
+    });
+  }
+
+  Future<void> manageAttendedStatus({
+    required String opportunityId,
+    required String userId,
+  }) async {
+    final query = await db.where(FieldPath.documentId, isEqualTo: userId).get();
+    final user = AuthUser.fromFirebase(query.docs[0]);
+    if (user.attended.contains(opportunityId)) {
+      user.attended.remove(opportunityId);
+    } else {
+      user.attended.add(opportunityId);
+    }
+    await db.doc(userId).update({
+      attendedField: user.attended,
     });
   }
 

@@ -13,6 +13,7 @@ class AuthUser {
   final String displayImage;
   final double hoursWorked;
   final List<String> opportunities;
+  final List<String> attended;
 
   const AuthUser({
     required this.id,
@@ -24,6 +25,7 @@ class AuthUser {
     required this.displayImage,
     required this.hoursWorked,
     required this.opportunities,
+    required this.attended,
   });
 
   factory AuthUser.fromFirebase(
@@ -43,6 +45,7 @@ class AuthUser {
       displayImage: data[displayImageField],
       hoursWorked: data[hoursWorkedField] == 0 ? 0.0 : data[hoursWorkedField],
       opportunities: opportunities.map((o) => o.toString()).toList(),
+      attended: (data[attendedField] as List).map((a) => a.toString()).toList(),
     );
   }
 }
