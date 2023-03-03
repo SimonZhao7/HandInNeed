@@ -7,10 +7,7 @@ import '../services/opportunities/opportunity.dart';
 // Widgets
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hand_in_need/widgets/button.dart';
-// Constants
-import '../constants/route_names.dart';
-// Util
-import 'package:go_router/go_router.dart';
+import '../widgets/opportunity_card.dart';
 
 class HomeContentView extends StatefulWidget {
   const HomeContentView({super.key});
@@ -23,6 +20,8 @@ class _HomeContentViewState extends State<HomeContentView> {
   GoogleMapController? _controller;
   final _geolocationService = GeoLocatorService();
   final _opportunityService = OpportunityService();
+  final ScrollController _scrollController = ScrollController();
+  final cardWidth = 250.0;
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +33,17 @@ class _HomeContentViewState extends State<HomeContentView> {
       return opportunities
           .map(
             (o) => Marker(
+              onTap: () {
+                final index = opportunities.indexOf(o);
+                _scrollController.animateTo(
+                  index * cardWidth,
+                  duration: const Duration(milliseconds: 1000),
+                  curve: Curves.easeOutExpo,
+                );
+              },
               markerId: MarkerId(o.place.placeId),
               infoWindow: InfoWindow(
                 title: o.title,
-                onTap: () {
-                  context.pushNamed(viewOpportunity, params: {'id': o.id});
-                },
               ),
               position: o.place.location,
             ),
@@ -88,15 +92,48 @@ class _HomeContentViewState extends State<HomeContentView> {
             initialData: const <Opportunity>[],
             builder: (context, snapshot) {
               final opportunities = snapshot.data!;
-              return GoogleMap(
-                onMapCreated: setMapController,
-                markers: getMarkers(opportunities),
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
-                initialCameraPosition: CameraPosition(
-                  target: position,
-                  zoom: 15,
-                ),
+              return Stack(
+                children: [
+                  GoogleMap(
+                    onMapCreated: setMapController,
+                    markers: getMarkers(opportunities),
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
+                    initialCameraPosition: CameraPosition(
+                      target: position,
+                      zoom: 15,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      height: 200,
+                      padding: const EdgeInsets.all(20),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
+                      ),
+                      child: ListView.separated(
+                        controller: _scrollController,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: opportunities.length,
+                        itemBuilder: (context, index) {
+                          final op = opportunities[index];
+                          return OpportunityCard(
+                            cardWidth: cardWidth,
+                            opportunity: op,
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return const SizedBox(width: 20);
+                        },
+                      ),
+                    ),
+                  )
+                ],
               );
             },
           );
