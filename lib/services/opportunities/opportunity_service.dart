@@ -35,18 +35,33 @@ class OpportunityService {
 
   Stream<List<Opportunity>> allOpportunities() => db
       .where(verifiedField, isEqualTo: true)
+      .where(startTimeField, isGreaterThan: Timestamp.now())
       .snapshots()
       .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
 
-  Stream<List<Opportunity>> yourOpportunities() => db
-      .where(userIdField, isEqualTo: _authService.userDetails.uid)
-      .snapshots()
-      .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
+  Stream<List<Opportunity>> yourOpportunities(bool past) {
+    var query = db.where(
+      userIdField,
+      isEqualTo: _authService.userDetails.uid,
+    );
+    query = past
+        ? query.where(endTimeField, isLessThanOrEqualTo: Timestamp.now())
+        : query.where(endTimeField, isGreaterThan: Timestamp.now());
+    return query
+        .snapshots()
+        .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
+  }
 
-  Stream<List<Opportunity>> manageOpportunities() => db
-      .where(organizationEmailField, isEqualTo: _authService.userDetails.email)
-      .snapshots()
-      .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
+  Stream<List<Opportunity>> manageOpportunities(bool past) {
+    var query = db.where(organizationEmailField,
+        isEqualTo: _authService.userDetails.email);
+    query = past
+        ? query.where(endTimeField, isLessThanOrEqualTo: Timestamp.now())
+        : query.where(endTimeField, isGreaterThan: Timestamp.now());
+    return query
+        .snapshots()
+        .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
+  }
 
   Future<void> addOpportunity({
     required String title,

@@ -49,7 +49,14 @@ class ManageAttendeesView extends StatelessWidget {
                     child: Slidable(
                       endActionPane: ActionPane(
                         motion: const ScrollMotion(),
+                        extentRatio: 0.75,
                         children: [
+                          SlidableAction(
+                            onPressed: (context) {},
+                            label: 'Profile',
+                            icon: Icons.account_circle,
+                            backgroundColor: Colors.blue,
+                          ),
                           SlidableAction(
                             onPressed: (context) async {
                               final value = await showDeleteConfirmationDialog(
@@ -74,6 +81,7 @@ class ManageAttendeesView extends StatelessWidget {
                             flex: 1,
                           ),
                           SlidableAction(
+                            padding: EdgeInsets.all(10),
                             onPressed: (context) async {
                               await authService.manageAttendedStatus(
                                 opportunityId: opportunityId,

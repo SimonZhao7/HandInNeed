@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 // Services
-import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
 import 'package:hand_in_need/services/opportunities/opportunity_view_type.dart';
 import 'package:hand_in_need/widgets/opportunities_list.dart';
 
@@ -9,10 +8,6 @@ class OpportunityTabsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final opportunityService = OpportunityService();
-    final yourOpportunities = opportunityService.yourOpportunities();
-    final manageOpportunities = opportunityService.manageOpportunities();
-
     return DefaultTabController(
       initialIndex: 0,
       length: 2,
@@ -29,14 +24,12 @@ class OpportunityTabsView extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
-            OpportunitiesList(
-              stream: yourOpportunities,
+            OpportunitiesList(  
               type: OpportunityViewType.posted,
             ),
             OpportunitiesList(
-              stream: manageOpportunities,
               type: OpportunityViewType.manage,
             ),
           ],

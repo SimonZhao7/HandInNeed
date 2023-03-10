@@ -96,9 +96,13 @@ class _AddOpportunityState extends State<AddOpportunity> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Title', style: label),
+              Text(
+                'Title',
+                style: label,
+              ),
               Input(
                 controller: _title,
+                autofocus: true,
               ),
               Text('Description', style: label),
               Input(
@@ -317,9 +321,10 @@ class _AddOpportunityState extends State<AddOpportunity> {
 
   void _showDeleteDialog() async {
     final value = await showDeleteConfirmationDialog(
-      context,
-      'Are you sure you want to delete this opportunity?',
-    ) ?? false;
+          context,
+          'Are you sure you want to delete this opportunity?',
+        ) ??
+        false;
     if (value) {
       _opportunityService
           .deleteOpportunity(widget.opportunity!.id)
