@@ -9,3 +9,4 @@ const manageAttendees = 'opportunity-manage';
 const changeOpportunityEmail = 'change-opportunity-email';
 const userSettings = 'user-settings';
 const updateProfilePhoto = 'update-profile-photo';
+const updatePhoneNumber = 'update-phone-number';

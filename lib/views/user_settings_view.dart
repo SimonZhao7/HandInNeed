@@ -90,7 +90,7 @@ class UserSettingsView extends StatelessWidget {
           ListTile(
             title: const Text('Update Phone Number'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () => context.pushNamed(updatePhoneNumber),
           ),
           ListTile(
             title: const Text('Update Email'),

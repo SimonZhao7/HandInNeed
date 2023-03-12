@@ -98,6 +98,11 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
                           context,
                           'Expired verification code. Please log in again for another code',
                         );
+                      } else if (e is PhoneNumberAlreadyInUseAuthException) {
+                        showErrorSnackbar(
+                          context,
+                          'Phone number is already in use',
+                        );
                       } else {
                         showErrorSnackbar(
                           context,

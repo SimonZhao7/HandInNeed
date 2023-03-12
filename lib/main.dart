@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 // Views
 import 'package:hand_in_need/views/create_or_update_opportunity_view.dart';
+import 'package:hand_in_need/views/update_phone_number_view.dart';
 import 'package:hand_in_need/views/change_opportunity_email.dart';
 import 'package:hand_in_need/views/opportunity_details_view.dart';
 import 'package:hand_in_need/views/manage_attendees_view.dart';
@@ -79,6 +80,11 @@ final GoRouter _router = GoRouter(
       path: '/auth/update/photo',
       name: updateProfilePhoto,
       builder: (context, state) => const UpdateProfilePhotoView(),
+    ),
+    GoRoute(
+      path: '/auth/update/phone-number',
+      name: updatePhoneNumber,
+      builder: (context, state) => const UpdatePhoneNumberView(),
     ),
     GoRoute(
       path: '/opportunities/add',

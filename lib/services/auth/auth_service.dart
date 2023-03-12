@@ -80,6 +80,8 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'session-expired') {
         throw SessionExpiredAuthException();
+      } else if (e.code == 'credential-already-in-use') {
+        throw PhoneNumberAlreadyInUseAuthException();
       } else {
         throw InvalidVerificationCodeAuthException();
       }
@@ -160,6 +162,30 @@ class AuthService {
     await db.doc(userDetails.uid).update({
       displayImageField: imageUrl,
     });
+    await userDetails.updatePhotoURL(imageUrl);
+  }
+
+  Future<void> updatePhoneNumber({
+    required String verificationId,
+    required String smsCode,
+  }) async {
+    try {
+      final credential = PhoneAuthProvider.credential(
+        verificationId: verificationId,
+        smsCode: smsCode,
+      );
+      await userDetails.updatePhoneNumber(credential);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-verification-code') {
+        throw InvalidVerificationCodeAuthException();
+      } else if (e.code == 'credential-already-in-use') {
+        throw PhoneNumberAlreadyInUseAuthException();
+      } else {
+        throw SessionExpiredAuthException();
+      }
+    } catch (_) {
+      throw GenericAuthException();
+    }
   }
 
   Future<void> manageJoinStatus({

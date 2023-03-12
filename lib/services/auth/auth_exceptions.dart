@@ -11,6 +11,8 @@ class TooManyRequestsAuthException implements AuthException {}
 
 class InvalidVerificationCodeAuthException implements AuthException {}
 
+class PhoneNumberAlreadyInUseAuthException implements AuthException {}
+
 class SessionExpiredAuthException implements AuthException {}
 
 // Account Setup
