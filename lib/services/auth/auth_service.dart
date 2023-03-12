@@ -147,6 +147,21 @@ class AuthService {
     }
   }
 
+  Future<void> updateProfilePhoto({
+    required XFile? photo,
+  }) async {
+    if (photo == null) {
+      throw NoProfilePictureProvidedAuthException();
+    }
+    final imageUrl = await _storageService.uploadImage(
+      selectedPhoto: photo,
+      path: imagePath,
+    );
+    await db.doc(userDetails.uid).update({
+      displayImageField: imageUrl,
+    });
+  }
+
   Future<void> manageJoinStatus({
     required String opportunityId,
     required String userId,
@@ -187,4 +202,9 @@ class AuthService {
         .snapshots()
         .map((s) => s.docs.map(AuthUser.fromFirebase).toList());
   }
+
+  Stream<AuthUser> getUserStream(String userId) => db
+      .where(FieldPath.documentId, isEqualTo: userId)
+      .snapshots()
+      .map((s) => AuthUser.fromFirebase(s.docs[0]));
 }

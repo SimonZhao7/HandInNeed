@@ -7,3 +7,5 @@ const viewOpportunity = 'opportunity-details';
 const inputAddress = 'address-input';
 const manageAttendees = 'opportunity-manage';
 const changeOpportunityEmail = 'change-opportunity-email';
+const userSettings = 'user-settings';
+const updateProfilePhoto = 'update-profile-photo';

@@ -15,11 +15,19 @@ class AccountSettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final authService = AuthService();
 
-    return Container(
-      padding: const EdgeInsets.all(30),
-      child: Column(
-        children: [
-          Button(
+    return Column(
+      children: [
+        ListTile(
+          title: Text(
+            'User Settings',
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.pushNamed(userSettings),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Button(
             onPressed: () async {
               final navigator = GoRouter.of(context);
               await authService.signOut();
@@ -27,8 +35,8 @@ class AccountSettingsView extends StatelessWidget {
             },
             label: 'Sign Out',
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

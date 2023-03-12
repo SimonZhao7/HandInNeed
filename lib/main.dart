@@ -10,7 +10,9 @@ import 'package:hand_in_need/views/create_or_update_opportunity_view.dart';
 import 'package:hand_in_need/views/change_opportunity_email.dart';
 import 'package:hand_in_need/views/opportunity_details_view.dart';
 import 'package:hand_in_need/views/manage_attendees_view.dart';
+import 'package:hand_in_need/views/update_profile_photo.dart';
 import 'package:hand_in_need/views/address_search_view.dart';
+import 'package:hand_in_need/views/user_settings_view.dart';
 import 'package:hand_in_need/views/account_setup_view.dart';
 import 'package:hand_in_need/views/verify_phone_view.dart';
 import 'package:hand_in_need/views/register_view.dart';
@@ -67,6 +69,16 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => VerifyPhoneView(
         verificationId: state.params['verificationId']!,
       ),
+    ),
+    GoRoute(
+      path: '/auth/user-settings',
+      name: userSettings,
+      builder: (context, state) => const UserSettingsView(),
+    ),
+    GoRoute(
+      path: '/auth/update/photo',
+      name: updateProfilePhoto,
+      builder: (context, state) => const UpdateProfilePhotoView(),
     ),
     GoRoute(
       path: '/opportunities/add',
