@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_service.dart';
+// Views
 import 'package:hand_in_need/views/home_content_view.dart';
 import 'package:hand_in_need/views/opportunity_tabs_view.dart';
 import 'package:hand_in_need/views/account_settings_view.dart';
+import 'package:hand_in_need/views/upcoming_opportunities_view.dart';
 // Constants
 import '../constants/route_names.dart';
 // Uitl
@@ -18,20 +20,21 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final authService = AuthService();
+  final List<String> titles = ['Home', 'Upcoming', 'Your Jobs', 'Account'];
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: Text(titles[_selectedIndex]),
         elevation: 0,
       ),
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
           HomeContentView(),
-          Text('Upcoming'),
+          UpcomingOpportunitiesView(),
           OpportunityTabsView(),
           AccountSettingsView(),
         ],

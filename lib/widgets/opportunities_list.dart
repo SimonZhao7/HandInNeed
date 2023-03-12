@@ -48,36 +48,37 @@ class _OpportunitiesListState extends State<OpportunitiesList> {
     final manageOpportunities = opportunityService.manageOpportunities(past);
     final dateFormat = DateFormat.yMd();
 
-    return StreamBuilder(
-      stream: widget.type == OpportunityViewType.posted
-          ? yourOpportunities
-          : manageOpportunities,
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.active:
-          case ConnectionState.done:
-            final data = snapshot.data!;
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: () => setState(() {
-                      past = !past;
-                    }),
-                    child: Chip(
-                      label: Text(past ? 'Active Posts' : 'Past Posts'),
-                      backgroundColor: Colors.black,
-                      labelStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: ListView.separated(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          GestureDetector(
+            onTap: () => setState(() {
+              past = !past;
+            }),
+            child: Chip(
+              label: Text(past ? 'Active Posts' : 'Past Posts'),
+              backgroundColor: Colors.black,
+              labelStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: StreamBuilder(
+              stream: widget.type == OpportunityViewType.posted
+                  ? yourOpportunities
+                  : manageOpportunities,
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    final data = snapshot.data!;
+                    return ListView.separated(
+                      itemCount: data.length,
                       padding: const EdgeInsets.only(top: 10),
                       itemBuilder: (context, index) {
                         final opportunity = data[index];
@@ -178,16 +179,15 @@ class _OpportunitiesListState extends State<OpportunitiesList> {
                       separatorBuilder: (context, index) {
                         return const SizedBox(height: 15);
                       },
-                      itemCount: data.length,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          default:
-            return const Center(child: CircularProgressIndicator());
-        }
-      },
+                    );
+                  default:
+                    return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+          )
+        ],
+      ),
     );
   }
 
