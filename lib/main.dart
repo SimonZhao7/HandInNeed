@@ -11,6 +11,7 @@ import 'package:hand_in_need/views/update_phone_number_view.dart';
 import 'package:hand_in_need/views/change_opportunity_email.dart';
 import 'package:hand_in_need/views/opportunity_details_view.dart';
 import 'package:hand_in_need/views/manage_attendees_view.dart';
+import 'package:hand_in_need/views/update_username_view.dart';
 import 'package:hand_in_need/views/update_profile_photo.dart';
 import 'package:hand_in_need/views/address_search_view.dart';
 import 'package:hand_in_need/views/user_settings_view.dart';
@@ -91,6 +92,11 @@ final GoRouter _router = GoRouter(
       path: '/auth/update/email',
       name: updateEmail,
       builder: (context, state) => const UpdateEmailView(),
+    ),
+       GoRoute(
+      path: '/auth/update/username',
+      name: updateUsernmae,
+      builder: (context, state) => const UpdateUsernameView(),
     ),
     GoRoute(
       path: '/opportunities/add',

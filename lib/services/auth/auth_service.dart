@@ -99,7 +99,7 @@ class AuthService {
     final user = FirebaseAuth.instance.currentUser!;
     final users = await FirebaseFirestore.instance
         .collection(userCollectionName)
-        .where(userNamefield, isEqualTo: userName)
+        .where(userNameField, isEqualTo: userName)
         .get();
 
     if (email.trim().isEmpty) throw NoEmailProvidedAuthException();
@@ -125,7 +125,7 @@ class AuthService {
       await user.updatePhotoURL(imageUrl);
 
       await db.doc(user.uid).set({
-        userNamefield: userName,
+        userNameField: userName,
         emailField: email,
         firstNameField: firstName,
         lastNameField: lastName,
@@ -209,6 +209,16 @@ class AuthService {
     } catch (e) {
       throw GenericAuthException();
     }
+  }
+
+  Future<void> updateUsername({required String username}) async {
+    if (username.trim().isEmpty) throw NoUserNameProvidedAuthException();
+    if (username.trim().length < 8) throw UserNameTooShortAuthException();
+    final query = await db.where(userNameField, isEqualTo: username).get();
+    if (query.docs.isNotEmpty) throw UserNameAlreadyExistsAuthException();
+    await db.doc(userDetails.uid).update({
+      userNameField: username,
+    });
   }
 
   Future<void> manageJoinStatus({

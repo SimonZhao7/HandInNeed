@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_service.dart';

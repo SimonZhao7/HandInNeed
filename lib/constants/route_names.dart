@@ -11,3 +11,4 @@ const userSettings = 'user-settings';
 const updateProfilePhoto = 'update-profile-photo';
 const updatePhoneNumber = 'update-phone-number';
 const updateEmail = 'update-email';
+const updateUsernmae = 'update-username';

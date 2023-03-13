@@ -100,7 +100,7 @@ class UserSettingsView extends StatelessWidget {
           ListTile(
             title: const Text('Update Username'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+            onTap: () => context.pushNamed(updateUsernmae),
           ),
         ],
       ),

@@ -40,7 +40,7 @@ class AuthUser {
       email: data[emailField],
       firstName: data[firstNameField],
       lastName: data[lastNameField],
-      userName: data[userNamefield],
+      userName: data[userNameField],
       description: data[descriptionField],
       displayImage: data[displayImageField],
       hoursWorked: data[hoursWorkedField] == 0 ? 0.0 : data[hoursWorkedField],
