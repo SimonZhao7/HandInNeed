@@ -33,3 +33,5 @@ class NoProfilePictureProvidedAuthException implements AuthException {}
 class InvalidEmailAuthException implements AuthException {}
 
 class EmailAlreadyInUseAuthException implements AuthException {}
+
+class RequiresRecentLoginAuthException implements AuthException {}

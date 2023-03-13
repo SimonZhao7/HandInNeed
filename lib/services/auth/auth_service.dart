@@ -188,6 +188,29 @@ class AuthService {
     }
   }
 
+  Future<void> updateEmail({
+    required String email,
+  }) async {
+    if (email.trim().isEmpty) throw NoEmailProvidedAuthException();
+    try {
+      await userDetails.updateEmail(email);
+      await userDetails.sendEmailVerification();
+      await db.doc(userDetails.uid).update({
+        emailField: email,
+      });
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-email') {
+        throw InvalidEmailAuthException();
+      } else if (e.code == 'email-already-in-use') {
+        throw EmailAlreadyInUseAuthException();
+      } else if (e.code == 'requires-recent-login') {
+        throw RequiresRecentLoginAuthException();
+      }
+    } catch (e) {
+      throw GenericAuthException();
+    }
+  }
+
   Future<void> manageJoinStatus({
     required String opportunityId,
     required String userId,

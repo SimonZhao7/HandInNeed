@@ -16,6 +16,7 @@ import 'package:hand_in_need/views/address_search_view.dart';
 import 'package:hand_in_need/views/user_settings_view.dart';
 import 'package:hand_in_need/views/account_setup_view.dart';
 import 'package:hand_in_need/views/verify_phone_view.dart';
+import 'package:hand_in_need/views/update_email_view.dart';
 import 'package:hand_in_need/views/register_view.dart';
 import 'package:hand_in_need/views/home_view.dart';
 // Services
@@ -85,6 +86,11 @@ final GoRouter _router = GoRouter(
       path: '/auth/update/phone-number',
       name: updatePhoneNumber,
       builder: (context, state) => const UpdatePhoneNumberView(),
+    ),
+    GoRoute(
+      path: '/auth/update/email',
+      name: updateEmail,
+      builder: (context, state) => const UpdateEmailView(),
     ),
     GoRoute(
       path: '/opportunities/add',

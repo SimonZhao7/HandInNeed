@@ -240,6 +240,20 @@ class OpportunityService {
     });
   }
 
+  Future<void> handleEmailChanges({required String oldEmail}) async {
+    final query = await db
+        .where(
+          organizationEmailField,
+          isEqualTo: oldEmail,
+        )
+        .get();
+    for (final doc in query.docs) {
+      await doc.reference.update({
+        organizationEmailField: _authService.userDetails.email,
+      });
+    }
+  }
+
   Future<Opportunity> _getOpportunity(String id) async {
     return Opportunity.fromFirebase(
       (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs.first,
