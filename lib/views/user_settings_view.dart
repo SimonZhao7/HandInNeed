@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_service.dart';
-// Constants
-import 'package:hand_in_need/constants/route_names.dart';
-// Util
-import 'package:go_router/go_router.dart';
+// Extensions
+import 'package:hand_in_need/extensions/navigator.dart';
+// Views
+import 'package:hand_in_need/views/update_email_view.dart';
+import 'package:hand_in_need/views/update_phone_number_view.dart';
+import 'package:hand_in_need/views/update_profile_photo.dart';
+import 'package:hand_in_need/views/update_username_view.dart';
+// Widgets
 import 'package:hand_in_need/widgets/button.dart';
 
 class UserSettingsView extends StatefulWidget {
@@ -21,6 +25,8 @@ class _UserSettingsViewState extends State<UserSettingsView> {
   @override
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme;
+    final navigator = Navigator.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Settings'),
@@ -135,22 +141,30 @@ class _UserSettingsViewState extends State<UserSettingsView> {
           ListTile(
             title: const Text('Update Profile Photo'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.pushNamed(updateProfilePhoto),
+            onTap: () => navigator.pushSlideRoute(
+              const UpdateProfilePhotoView(),
+            ),
           ),
           ListTile(
             title: const Text('Update Phone Number'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.pushNamed(updatePhoneNumber),
+            onTap: () => navigator.pushSlideRoute(
+              const UpdatePhoneNumberView(),
+            ),
           ),
           ListTile(
             title: const Text('Update Email'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.pushNamed(updateEmail),
+            onTap: () => navigator.pushSlideRoute(
+              const UpdateEmailView(),
+            ),
           ),
           ListTile(
             title: const Text('Update Username'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.pushNamed(updateUsernmae),
+            onTap: () => navigator.pushSlideRoute(
+              const UpdateUsernameView(),
+            ),
           ),
         ],
       ),
