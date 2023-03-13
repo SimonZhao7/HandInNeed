@@ -11,6 +11,7 @@ class Button extends StatelessWidget {
   final Widget? trailing;
   final double height;
   final double borderRadius;
+  final double? fontSize;
   final int? backgroundColor;
   final int? textColor;
 
@@ -26,6 +27,7 @@ class Button extends StatelessWidget {
     this.center,
     this.icon,
     this.trailing,
+    this.fontSize,
   });
 
   List<Widget> renderContent() {
@@ -46,7 +48,7 @@ class Button extends StatelessWidget {
               label ?? '',
               style: TextStyle(
                 color: textColor != null ? Color(textColor!) : null,
-                fontSize: defaultFontSize,
+                fontSize: fontSize ?? defaultFontSize,
               ),
             ),
       ),
