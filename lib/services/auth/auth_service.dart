@@ -224,6 +224,7 @@ class AuthService {
   Future<void> manageJoinStatus({
     required String opportunityId,
     required String userId,
+    Duration? difference,
   }) async {
     final query = await db.where(FieldPath.documentId, isEqualTo: userId).get();
     final user = AuthUser.fromFirebase(query.docs[0]);
@@ -231,6 +232,14 @@ class AuthService {
 
     if (opportunities.contains(opportunityId)) {
       opportunities.remove(opportunityId);
+      if (user.attended.contains(opportunityId)) {
+        // assert difference != null
+        manageAttendedStatus(
+          opportunityId: opportunityId,
+          difference: difference!,
+          userId: userId,
+        );
+      }
     } else {
       opportunities.add(opportunityId);
     }
@@ -241,17 +250,24 @@ class AuthService {
 
   Future<void> manageAttendedStatus({
     required String opportunityId,
+    required Duration difference,
     required String userId,
   }) async {
     final query = await db.where(FieldPath.documentId, isEqualTo: userId).get();
     final user = AuthUser.fromFirebase(query.docs[0]);
+    final hours = difference.inHours + difference.inMinutes / 60;
+    late double newHours;
+
     if (user.attended.contains(opportunityId)) {
       user.attended.remove(opportunityId);
+      newHours = user.hoursWorked - hours;
     } else {
       user.attended.add(opportunityId);
+      newHours = user.hoursWorked + hours;
     }
     await db.doc(userId).update({
       attendedField: user.attended,
+      hoursWorkedField: newHours,
     });
   }
 

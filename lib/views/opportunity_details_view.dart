@@ -131,6 +131,10 @@ class OpportunityDetailsView extends StatelessWidget {
                                     authService.manageJoinStatus(
                                       opportunityId: opportunity.id,
                                       userId: authService.userDetails.uid,
+                                      difference:
+                                          opportunity.endTime.difference(
+                                        opportunity.startTime,
+                                      ),
                                     );
                                   },
                                   label: opportunity.attendees
