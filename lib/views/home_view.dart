@@ -20,7 +20,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final authService = AuthService();
-  final List<String> titles = ['Home', 'Upcoming', 'Your Jobs', 'Account'];
+  final List<String> titles = ['Home', 'Events', 'Your Jobs', 'Account'];
   int _selectedIndex = 0;
 
   @override
@@ -34,7 +34,7 @@ class _HomeViewState extends State<HomeView> {
         index: _selectedIndex,
         children: const [
           HomeContentView(),
-          UpcomingOpportunitiesView(),
+          VolunteeringView(),
           OpportunityTabsView(),
           AccountSettingsView(),
         ],
@@ -57,7 +57,7 @@ class _HomeViewState extends State<HomeView> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.calendar_month),
-              label: 'Upcoming',
+              label: 'Events',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.cases_outlined),

@@ -53,7 +53,7 @@ class OpportunityService {
       .snapshots()
       .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
 
-  Stream<List<Opportunity>> upcomingOpportunities(bool past) => db
+  Stream<List<Opportunity>> upcomingOpportunities({ required bool past }) => db
       .where(attendeesField, arrayContains: _authService.userDetails.uid)
       .filterTime(past: past, fieldName: startTimeField)
       .snapshots()
