@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hand_in_need/services/auth/auth_service.dart';
 import '../services/opportunities/opportunity_service.dart';
 // Widgets
+import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/link_text.dart';
 import 'package:hand_in_need/widgets/button.dart';
 // Util
@@ -39,6 +40,9 @@ class OpportunityDetailsView extends StatelessWidget {
                 final place = opportunity.place;
                 final owned = opportunity.organizationEmail ==
                     authService.userDetails.email;
+                final started =
+                    opportunity.startTime.difference(DateTime.now()) <=
+                        Duration.zero;
                 return ListView(
                   children: [
                     ConstrainedBox(
@@ -115,6 +119,13 @@ class OpportunityDetailsView extends StatelessWidget {
                           owned
                               ? Button(
                                   onPressed: () {
+                                    if (started) {
+                                      showErrorSnackbar(
+                                        context,
+                                        'You can not edit this opportunity because event has already begun',
+                                      );
+                                      return;
+                                    }
                                     context.pushNamed(
                                       addOpportunity,
                                       extra: opportunity,
@@ -124,6 +135,13 @@ class OpportunityDetailsView extends StatelessWidget {
                                 )
                               : Button(
                                   onPressed: () {
+                                    if (started) {
+                                      showErrorSnackbar(
+                                        context,
+                                        'You can not join this opportunity because event has already begun',
+                                      );
+                                      return;
+                                    }
                                     opportunityService.manageJoinStatus(
                                       opportunityId: opportunity.id,
                                       userId: authService.userDetails.uid,

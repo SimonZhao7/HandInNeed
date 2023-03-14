@@ -53,7 +53,7 @@ class OpportunityService {
       .snapshots()
       .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
 
-  Stream<List<Opportunity>> upcomingOpportunities({ required bool past }) => db
+  Stream<List<Opportunity>> upcomingOpportunities({required bool past}) => db
       .where(attendeesField, arrayContains: _authService.userDetails.uid)
       .filterTime(past: past, fieldName: startTimeField)
       .snapshots()
@@ -173,10 +173,24 @@ class OpportunityService {
       );
       updateMap[imageField] = photoURL;
     }
+
+    final oldDifference = opportunity.endTime.difference(opportunity.startTime);
+    final newDifference = formattedDates[endTimeField]!.difference(
+      formattedDates[startTimeField]!,
+    );
+    final netDiff = oldDifference.inMinutes / 60 + newDifference.inMinutes / 60;
+
+    await _handleOpportunityTimeUpdate(
+        opportunity: opportunity, netDiff: netDiff);
     await db.doc(id).update(updateMap);
   }
 
   Future<void> deleteOpportunity(String id) async {
+    final op = await _getOpportunity(id);
+    await _handleOpportunityTimeUpdate(
+      opportunity: op,
+      netDiff: op.endTime.difference(op.startTime).inMinutes / 60,
+    );
     await db.doc(id).delete();
   }
 
@@ -258,6 +272,19 @@ class OpportunityService {
     return Opportunity.fromFirebase(
       (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs.first,
     );
+  }
+
+  Future<void> _handleOpportunityTimeUpdate({
+    required Opportunity opportunity,
+    required double netDiff,
+  }) async {
+    for (String id in opportunity.attendees) {
+      final user = await _authService.getUser(id);
+      await _authService.updateHoursWorked(
+        id: id,
+        newHours: user.hoursWorked - netDiff,
+      );
+    }
   }
 
   Future<void> _sendVerificationEmail({

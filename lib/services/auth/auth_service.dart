@@ -21,14 +21,13 @@ class AuthService {
 
   User get userDetails => FirebaseAuth.instance.currentUser!;
 
+  Future<AuthUser> getUser(String id) async => AuthUser.fromFirebase(
+        (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs[0],
+      );
+
   Future<AuthUser> currentUser() async {
     try {
-      final user = FirebaseAuth.instance.currentUser!;
-      final query =
-          await db.where(FieldPath.documentId, isEqualTo: user.uid).get();
-
-      final data = query.docs[0];
-      return AuthUser.fromFirebase(data);
+      return getUser(FirebaseAuth.instance.currentUser!.uid);
     } catch (_) {
       throw NotSignedInAuthException();
     }
@@ -221,6 +220,15 @@ class AuthService {
     });
   }
 
+  Future<void> updateHoursWorked({
+    required String id,
+    required double newHours,
+  }) async {
+    await db.doc(id).update({
+      hoursWorkedField: newHours,
+    });
+  }
+
   Future<void> manageJoinStatus({
     required String opportunityId,
     required String userId,
@@ -255,7 +263,7 @@ class AuthService {
   }) async {
     final query = await db.where(FieldPath.documentId, isEqualTo: userId).get();
     final user = AuthUser.fromFirebase(query.docs[0]);
-    final hours = difference.inHours + difference.inMinutes / 60;
+    final hours = difference.inMinutes / 60;
     late double newHours;
 
     if (user.attended.contains(opportunityId)) {

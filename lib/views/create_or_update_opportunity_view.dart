@@ -158,6 +158,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
               ),
               Button(
                 onPressed: () async {
+                  FocusScope.of(context).unfocus();
                   final selectedDate = await showDatePicker(
                     context: context,
                     initialDate: DateTime.now(),
@@ -170,7 +171,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
                     initialEntryMode: DatePickerEntryMode.input,
                   );
                   setState(() {
-                    startDate = selectedDate;
+                    startDate = selectedDate ?? startDate;
                   });
                 },
                 label: startDate != null
@@ -181,9 +182,9 @@ class _AddOpportunityState extends State<AddOpportunity> {
               Text('Start Time', style: label),
               Button(
                 onPressed: () async {
-                  final selectedTime = await _showTimeInput();
+                  final selectedTime = await _showTimeInput(time: startTime);
                   setState(() {
-                    startTime = selectedTime;
+                    startTime = selectedTime ?? startTime;
                   });
                 },
                 label: startTime != null
@@ -194,9 +195,9 @@ class _AddOpportunityState extends State<AddOpportunity> {
               Text('End Time', style: label),
               Button(
                 onPressed: () async {
-                  final selectedTime = await _showTimeInput();
+                  final selectedTime = await _showTimeInput(time: endTime);
                   setState(() {
-                    endTime = selectedTime;
+                    endTime = selectedTime ?? endTime;
                   });
                 },
                 label: endTime != null
@@ -332,10 +333,10 @@ class _AddOpportunityState extends State<AddOpportunity> {
     }
   }
 
-  Future<TimeOfDay?> _showTimeInput() {
+  Future<TimeOfDay?> _showTimeInput({TimeOfDay? time}) {
     return showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: time ?? TimeOfDay.now(),
       initialEntryMode: TimePickerEntryMode.inputOnly,
     );
   }
