@@ -18,6 +18,7 @@ import 'package:hand_in_need/services/opportunities/fields.dart';
 // Extensions
 import 'package:hand_in_need/extensions/query_methods.dart';
 // Util
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:validators/validators.dart';
 
 class OpportunityService {
@@ -35,11 +36,25 @@ class OpportunityService {
 
   final db = FirebaseFirestore.instance.collection(collectionName);
 
-  Stream<List<Opportunity>> allOpportunities() => db
-      .where(verifiedField, isEqualTo: true)
-      .where(startTimeField, isGreaterThan: Timestamp.now())
-      .snapshots()
-      .map((s) => s.docs.map(Opportunity.fromFirebase).toList());
+  Stream<List<Opportunity>> allOpportunities(LatLngBounds bound) {
+    final fromBound = bound.southwest;
+    final toBound = bound.northeast;
+    return db
+        .where(verifiedField, isEqualTo: true)
+        .where(startTimeField, isGreaterThan: Timestamp.now())
+        .snapshots()
+        .map(
+          (s) => s.docs.map(Opportunity.fromFirebase).where((op) {
+            final location = op.place.location;
+            final lat = location.latitude;
+            final lng = location.longitude;
+            return fromBound.latitude < lat &&
+                lat < toBound.latitude &&
+                fromBound.longitude < lng &&
+                lng < toBound.longitude;
+          }).toList(),
+        );
+  }
 
   Stream<List<Opportunity>> yourOpportunities(bool past) => db
       .where(userIdField, isEqualTo: _authService.userDetails.uid)

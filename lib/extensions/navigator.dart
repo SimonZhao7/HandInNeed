@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 extension AnimatedNavigation on NavigatorState {
-  void pushSlideRoute(Widget view) {
-    push(
+  Future<T?> pushSlideRoute<T>(Widget view) {
+    return push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => view,
         transitionsBuilder: (

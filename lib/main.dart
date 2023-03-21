@@ -93,7 +93,7 @@ final GoRouter _router = GoRouter(
       name: updateEmail,
       builder: (context, state) => const UpdateEmailView(),
     ),
-       GoRoute(
+    GoRoute(
       path: '/auth/update/username',
       name: updateUsernmae,
       builder: (context, state) => const UpdateUsernameView(),
@@ -172,6 +172,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       routerConfig: _router,
+      debugShowCheckedModeBanner: false,
     );
   }
 }

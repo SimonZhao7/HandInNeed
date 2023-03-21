@@ -6,10 +6,7 @@ import 'package:hand_in_need/views/home_content_view.dart';
 import 'package:hand_in_need/views/opportunity_tabs_view.dart';
 import 'package:hand_in_need/views/account_settings_view.dart';
 import 'package:hand_in_need/views/upcoming_opportunities_view.dart';
-// Constants
-import '../constants/route_names.dart';
-// Uitl
-import 'package:go_router/go_router.dart';
+
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -20,16 +17,23 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final authService = AuthService();
-  final List<String> titles = ['Home', 'Events', 'Your Jobs', 'Account'];
+  final List<String> titles = ['', 'Events', 'Your Jobs', 'Account'];
   int _selectedIndex = 0;
+
+  PreferredSizeWidget? _renderAppBar() {
+    if (titles[_selectedIndex].trim().isNotEmpty) {
+      return AppBar(
+        title: Text(titles[_selectedIndex]),
+        elevation: 0,
+      );
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(titles[_selectedIndex]),
-        elevation: 0,
-      ),
+      appBar: _renderAppBar(),
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
@@ -75,13 +79,6 @@ class _HomeViewState extends State<HomeView> {
           },
           currentIndex: _selectedIndex,
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.pushNamed(addOpportunity);
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }
