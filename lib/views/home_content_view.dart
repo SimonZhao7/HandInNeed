@@ -5,11 +5,9 @@ import 'package:hand_in_need/bloc/maps/map_bloc.dart';
 import 'package:hand_in_need/bloc/maps/map_events.dart';
 import 'package:hand_in_need/bloc/maps/map_states.dart';
 // Services
-import 'package:hand_in_need/services/google_places/google_places_service.dart';
 import 'package:hand_in_need/services/google_places/autocomplete_result.dart';
 import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
 import 'package:hand_in_need/services/geolocator/geolocator_exceptions.dart';
-import 'package:hand_in_need/services/geolocator/geolocator_service.dart';
 import '../services/opportunities/opportunity.dart';
 // Widgets
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -33,10 +31,9 @@ class HomeContentView extends StatefulWidget {
 
 class _HomeContentViewState extends State<HomeContentView> {
   final _controller = Completer<GoogleMapController>();
-  final _geolocationService = GeoLocatorService();
-  final _googlePlacesService = GooglePlacesService();
   final opportunityService = OpportunityService();
   final scrollController = ScrollController();
+  OverlayEntry? overlay;
   late TextEditingController _search;
 
   final double cardWidth = 250.0;
@@ -71,61 +68,96 @@ class _HomeContentViewState extends State<HomeContentView> {
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme;
+
     return BlocProvider(
-      create: (_) => MapBloc(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Input(
-              controller: _search,
-              fillColor: white,
-              readOnly: true,
-              hint: 'Search for a location...',
-              onTap: () async {
-                final result = await Navigator.of(context)
-                    .pushSlideRoute<AutocompleteResult>(
-                        const AddressSearchView());
-                if (result != null) {
-                  _search.text = result.description;
-                  final place =
-                      await _googlePlacesService.fetchPlace(result.placeId);
-                  _controller.future.then((c) =>
-                      c.animateCamera(CameraUpdate.newLatLng(place.location)));
-                }
-              }),
-        ),
-        body: FutureBuilder(
-          future: _geolocationService.getCurrentLocation(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              final deniedForever = snapshot.error
-                  is LocationPermissionDeniedForeverGeolocatorException;
-              return Padding(
-                padding: const EdgeInsets.all(30),
+      create: (_) => MapBloc()..add(const InitializeEvent()),
+      child: BlocConsumer<MapBloc, MapState>(
+        listener: (context, state) {
+          if (state.loading && overlay == null) {
+            overlay = OverlayEntry(builder: (context) {
+              return Container(
+                color: Colors.black26,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      deniedForever
-                          ? 'Please enable location permissions in the settings'
-                          : 'Location has been denied',
-                      style: Theme.of(context).textTheme.headline3,
+                      'Loading...',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelMedium!
+                          .apply(color: Colors.white),
                     ),
                     const SizedBox(height: 20),
-                    Button(
-                      onPressed: () {
-                        setState(() {});
-                      },
-                      label: 'Enable Location',
-                    )
+                    const CircularProgressIndicator(color: Colors.white),
                   ],
                 ),
               );
-            } else {
-              final position = snapshot.data!;
-              return BlocConsumer<MapBloc, MapState>(
-                listener: (context, state) {},
-                builder: (context, state) {
-                  return StreamBuilder(
+            });
+            Overlay.of(context)?.insert(overlay!);
+          } else if (!state.loading) {
+            overlay?.remove();
+            overlay = null;
+          }
+          if (state is PositionSuccessState) {
+            _controller.future.then(
+              (c) => c.animateCamera(
+                CameraUpdate.newLatLng(state.position),
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          return Scaffold(
+            appBar: AppBar(
+              title: state is PositionFailState
+                  ? const Text('Home')
+                  : Input(
+                      controller: _search,
+                      fillColor: white,
+                      readOnly: true,
+                      hint: 'Search for a location...',
+                      onTap: () async {
+                        Navigator.of(context)
+                            .pushSlideRoute<AutocompleteResult>(
+                                const AddressSearchView())
+                            .then(
+                          (result) {
+                            if (result != null) {
+                              _search.text = result.description;
+                              context
+                                  .read<MapBloc>()
+                                  .add(UpdateLocationEvent(result));
+                            }
+                          },
+                        );
+                      },
+                    ),
+            ),
+            body: state is PositionFailState
+                ? Padding(
+                    padding: const EdgeInsets.all(30),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          state.exception
+                                  is LocationPermissionDeniedForeverGeolocatorException
+                              ? 'Please enable location permissions in the settings'
+                              : 'Location has been denied',
+                          style: Theme.of(context).textTheme.headline3,
+                        ),
+                        const SizedBox(height: 20),
+                        Button(
+                          onPressed: () {
+                            setState(() {});
+                          },
+                          label: 'Enable Location',
+                        )
+                      ],
+                    ),
+                  )
+                : StreamBuilder(
                     stream: opportunityService.allOpportunities(state.bounds),
                     initialData: const <Opportunity>[],
                     builder: (context, snapshot) {
@@ -136,9 +168,6 @@ class _HomeContentViewState extends State<HomeContentView> {
                             onMapCreated:
                                 (GoogleMapController controller) async {
                               _controller.complete(controller);
-                              controller.animateCamera(
-                                CameraUpdate.newLatLng(position),
-                              );
                             },
                             onCameraIdle: () {
                               _controller.future.then((c) => context
@@ -149,7 +178,7 @@ class _HomeContentViewState extends State<HomeContentView> {
                             myLocationEnabled: true,
                             myLocationButtonEnabled: true,
                             initialCameraPosition: CameraPosition(
-                              target: position,
+                              target: state.position,
                               zoom: 14,
                             ),
                           ),
@@ -165,21 +194,31 @@ class _HomeContentViewState extends State<HomeContentView> {
                                   topRight: Radius.circular(20),
                                 ),
                               ),
-                              child: ListView.separated(
-                                controller: scrollController,
-                                scrollDirection: Axis.horizontal,
-                                itemCount: opportunities.length,
-                                itemBuilder: (context, index) {
-                                  final op = opportunities[index];
-                                  return OpportunityCard(
-                                    cardWidth: cardWidth,
-                                    opportunity: op,
-                                  );
-                                },
-                                separatorBuilder: (context, index) {
-                                  return const SizedBox(width: 20);
-                                },
-                              ),
+                              child: opportunities.isEmpty
+                                  ? SizedBox(
+                                      width: double.infinity,
+                                      child: Center(
+                                        child: Text(
+                                          'No results found.',
+                                          style: textStyle.headline3,
+                                        ),
+                                      ),
+                                    )
+                                  : ListView.separated(
+                                      controller: scrollController,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: opportunities.length,
+                                      itemBuilder: (context, index) {
+                                        final op = opportunities[index];
+                                        return OpportunityCard(
+                                          cardWidth: cardWidth,
+                                          opportunity: op,
+                                        );
+                                      },
+                                      separatorBuilder: (context, index) {
+                                        return const SizedBox(width: 20);
+                                      },
+                                    ),
                             ),
                           ),
                           Align(
@@ -202,12 +241,9 @@ class _HomeContentViewState extends State<HomeContentView> {
                         ],
                       );
                     },
-                  );
-                },
-              );
-            }
-          },
-        ),
+                  ),
+          );
+        },
       ),
     );
   }

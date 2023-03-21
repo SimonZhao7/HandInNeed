@@ -1,5 +1,7 @@
-class LocationServiceDisabledGeolocatorException implements Exception {}
+class GeoLocatorException implements Exception {}
 
-class LocationPermissionDeniedGeolocatorException implements Exception {}
+class LocationServiceDisabledGeolocatorException extends GeoLocatorException {}
 
-class LocationPermissionDeniedForeverGeolocatorException implements Exception {}
+class LocationPermissionDeniedGeolocatorException extends GeoLocatorException {}
+
+class LocationPermissionDeniedForeverGeolocatorException extends GeoLocatorException {}
