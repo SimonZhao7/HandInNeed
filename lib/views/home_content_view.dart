@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 // Bloc
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hand_in_need/bloc/maps/map_bloc.dart';
-import 'package:hand_in_need/bloc/maps/map_events.dart';
-import 'package:hand_in_need/bloc/maps/map_states.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 // Services
 import 'package:hand_in_need/services/google_places/autocomplete_result.dart';
-import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
 import 'package:hand_in_need/services/geolocator/geolocator_exceptions.dart';
 import '../services/opportunities/opportunity.dart';
 // Widgets
@@ -31,18 +28,10 @@ class HomeContentView extends StatefulWidget {
 
 class _HomeContentViewState extends State<HomeContentView> {
   final _controller = Completer<GoogleMapController>();
-  final opportunityService = OpportunityService();
   final scrollController = ScrollController();
-  OverlayEntry? overlay;
-  late TextEditingController _search;
-
+  final TextEditingController _search = TextEditingController();
   final double cardWidth = 250.0;
-
-  @override
-  void initState() {
-    _search = TextEditingController();
-    super.initState();
-  }
+  OverlayEntry? overlay;
 
   Set<Marker> getMarkers(List<Opportunity> opportunities) {
     return opportunities
@@ -150,97 +139,76 @@ class _HomeContentViewState extends State<HomeContentView> {
                         const SizedBox(height: 20),
                         Button(
                           onPressed: () {
-                            setState(() {});
+                            context
+                                .read<MapBloc>()
+                                .add(const InitializeEvent());
                           },
                           label: 'Enable Location',
                         )
                       ],
                     ),
                   )
-                : StreamBuilder(
-                    stream: opportunityService.allOpportunities(state.bounds),
-                    initialData: const <Opportunity>[],
-                    builder: (context, snapshot) {
-                      final opportunities = snapshot.data!;
-                      return Stack(
-                        children: [
-                          GoogleMap(
-                            onMapCreated:
-                                (GoogleMapController controller) async {
-                              _controller.complete(controller);
-                            },
-                            onCameraIdle: () {
-                              _controller.future.then((c) => context
-                                  .read<MapBloc>()
-                                  .add(BoundsUpdateEvent(c)));
-                            },
-                            markers: getMarkers(opportunities),
-                            myLocationEnabled: true,
-                            myLocationButtonEnabled: true,
-                            initialCameraPosition: CameraPosition(
-                              target: state.position,
-                              zoom: 14,
+                : Stack(
+                    children: [
+                      GoogleMap(
+                        onMapCreated: (GoogleMapController controller) async {
+                          if (!_controller.isCompleted) {
+                            _controller.complete(controller);
+                          }
+                        },
+                        onCameraIdle: () {
+                          _controller.future.then((c) => context
+                              .read<MapBloc>()
+                              .add(BoundsUpdateEvent(c)));
+                        },
+                        markers: getMarkers(state.ops),
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                        initialCameraPosition: const CameraPosition(
+                          target: LatLng(0, 0),
+                          zoom: 14,
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          height: 200,
+                          padding: const EdgeInsets.all(20),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
                             ),
                           ),
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Container(
-                              height: 200,
-                              padding: const EdgeInsets.all(20),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(20),
-                                  topRight: Radius.circular(20),
-                                ),
-                              ),
-                              child: opportunities.isEmpty
-                                  ? SizedBox(
-                                      width: double.infinity,
-                                      child: Center(
-                                        child: Text(
-                                          'No results found.',
-                                          style: textStyle.headline3,
-                                        ),
-                                      ),
-                                    )
-                                  : ListView.separated(
-                                      controller: scrollController,
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: opportunities.length,
-                                      itemBuilder: (context, index) {
-                                        final op = opportunities[index];
-                                        return OpportunityCard(
-                                          cardWidth: cardWidth,
-                                          opportunity: op,
-                                        );
-                                      },
-                                      separatorBuilder: (context, index) {
-                                        return const SizedBox(width: 20);
-                                      },
+                          child: state.ops.isEmpty
+                              ? SizedBox(
+                                  width: double.infinity,
+                                  child: Center(
+                                    child: Text(
+                                      'No results found.',
+                                      style: textStyle.headline3,
                                     ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.topCenter,
-                            child: GestureDetector(
-                              onTap: () {
-                                _controller.future.then((c) => context
-                                    .read<MapBloc>()
-                                    .add(BoundsUpdateEvent(c)));
-                              },
-                              child: const Chip(
-                                label: Text(
-                                  'Search This Area',
-                                  style: TextStyle(color: Colors.white),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  controller: scrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: state.ops.length,
+                                  itemBuilder: (context, index) {
+                                    final op = state.ops[index];
+                                    return OpportunityCard(
+                                      cardWidth: cardWidth,
+                                      opportunity: op,
+                                    );
+                                  },
+                                  separatorBuilder: (context, index) {
+                                    return const SizedBox(width: 20);
+                                  },
                                 ),
-                                backgroundColor: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                        ),
+                      ),
+                    ],
                   ),
           );
         },

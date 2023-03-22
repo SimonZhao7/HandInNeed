@@ -1,6 +1,4 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-// Services
-import 'package:hand_in_need/services/google_places/autocomplete_result.dart';
+part of './map_bloc.dart';
 
 abstract class MapEvent {
   const MapEvent();
@@ -18,4 +16,9 @@ class BoundsUpdateEvent extends MapEvent {
 class UpdateLocationEvent extends MapEvent {
   final AutocompleteResult result;
   const UpdateLocationEvent(this.result);
+}
+
+class UpdateDataEvent extends MapEvent {
+  final List<Opportunity> ops;
+  const UpdateDataEvent(this.ops);
 }

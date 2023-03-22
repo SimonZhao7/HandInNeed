@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hand_in_need/constants/route_names.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_service.dart';
 // Views
@@ -6,7 +7,8 @@ import 'package:hand_in_need/views/home_content_view.dart';
 import 'package:hand_in_need/views/opportunity_tabs_view.dart';
 import 'package:hand_in_need/views/account_settings_view.dart';
 import 'package:hand_in_need/views/upcoming_opportunities_view.dart';
-
+// Util
+import 'package:go_router/go_router.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -79,6 +81,13 @@ class _HomeViewState extends State<HomeView> {
           },
           currentIndex: _selectedIndex,
         ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.pushNamed(addOpportunity);
+        },
+        child: const Icon(Icons.add)
       ),
     );
   }
