@@ -36,7 +36,7 @@ class AccountSettingsView extends StatelessWidget {
               onPressed: () async {
                 final navigator = GoRouter.of(context);
                 await authService.signOut();
-                navigator.goNamed(register);
+                navigator.goNamed(landing);
               },
               label: 'Sign Out',
             ),

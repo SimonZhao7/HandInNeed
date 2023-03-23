@@ -41,75 +41,91 @@ class _RegisterViewState extends State<RegisterView> {
       appBar: AppBar(backgroundColor: const Color(primary)),
       body: Container(
         padding: const EdgeInsets.all(30),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Text(
-              "Let's Begin!",
-              style: Theme.of(context).textTheme.headline1,
-            ),
-            const SizedBox(height: 50),
-            Text(
-              'Please enter your phone number',
-              style: Theme.of(context).textTheme.headline3,
-            ),
-            const SizedBox(height: 40),
-            Input(
-              controller: _phoneNumber,
-              hint: 'E.g. 444-444-4444',
-              type: TextInputType.phone,
-              borderWidth: 2,
-            ),
-            const SizedBox(height: 40),
-            Button(
-              onPressed: () async {
-                final focus = FocusScope.of(context);
-                final phoneNumber = _phoneNumber.text;
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Let's Begin!",
+                  style: Theme.of(context).textTheme.headline1,
+                ),
+                const SizedBox(height: 50),
+                Text(
+                  'Please enter your phone number',
+                  style: Theme.of(context).textTheme.headline3,
+                ),
+                const SizedBox(height: 40),
+                Input(
+                  controller: _phoneNumber,
+                  hint: 'E.g. 444-444-4444',
+                  type: TextInputType.phone,
+                  borderWidth: 2,
+                ),
+                const SizedBox(height: 40),
+                Button(
+                  onPressed: () async {
+                    final focus = FocusScope.of(context);
+                    final phoneNumber = _phoneNumber.text;
 
-                if (!focus.hasPrimaryFocus) {
-                  focus.unfocus();
-                }
+                    if (!focus.hasPrimaryFocus) {
+                      focus.unfocus();
+                    }
 
-                try {
-                  final verificationId =
-                      await _authService.sendPhoneVerification(
-                    phoneNumber: phoneNumber,
-                  );
-                  _navigateToVerification(verificationId);
-                } on AuthException catch (e) {
-                  if (e is InvalidPhoneNumberAuthException) {
-                    showErrorSnackbar(
-                      context,
-                      'Please enter a valid phone number',
-                    );
-                  } else if (e is TooManyRequestsAuthException) {
-                    showErrorSnackbar(
-                      context,
-                      'Too many sign in attempts. Please try again later',
-                    );
-                  } else {
-                    showErrorSnackbar(
-                      context,
-                      'Something went wrong',
-                    );
-                  }
-                }
-              },
-              center: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Text(
-                    'Next',
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
+                    try {
+                      final verificationId =
+                          await _authService.sendPhoneVerification(
+                        phoneNumber: phoneNumber,
+                      );
+                      _navigateToVerification(verificationId);
+                    } on AuthException catch (e) {
+                      if (e is InvalidPhoneNumberAuthException) {
+                        showErrorSnackbar(
+                          context,
+                          'Please enter a valid phone number',
+                        );
+                      } else if (e is TooManyRequestsAuthException) {
+                        showErrorSnackbar(
+                          context,
+                          'Too many sign in attempts. Please try again later',
+                        );
+                      } else {
+                        showErrorSnackbar(
+                          context,
+                          'Something went wrong',
+                        );
+                      }
+                    }
+                  },
+                  center: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Text(
+                        'Next',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Icon(Icons.arrow_forward_outlined),
+                    ],
                   ),
-                  SizedBox(width: 5),
-                  Icon(Icons.arrow_forward_outlined),
-                ],
+                  height: 55,
+                ),
+              ],
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: FloatingActionButton(
+                onPressed: () {
+                  context.goNamed(landing);
+                },
+                child: const Icon(
+                  Icons.arrow_back,
+                  size: 25,
+                ),
               ),
-              height: 55,
             ),
           ],
         ),

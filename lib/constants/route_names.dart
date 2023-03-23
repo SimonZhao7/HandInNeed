@@ -1,3 +1,4 @@
+const landing = 'landing';
 const register = 'register';
 const verifyPhone = 'verify-phone';
 const accountSetup = 'setup-account';

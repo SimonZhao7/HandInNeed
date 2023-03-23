@@ -19,6 +19,7 @@ import 'package:hand_in_need/views/account_setup_view.dart';
 import 'package:hand_in_need/views/verify_phone_view.dart';
 import 'package:hand_in_need/views/update_email_view.dart';
 import 'package:hand_in_need/views/register_view.dart';
+import 'package:hand_in_need/views/landing_view.dart';
 import 'package:hand_in_need/views/home_view.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_constants.dart';
@@ -44,6 +45,7 @@ final GoRouter _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
+      name: landing,
       builder: (context, state) => const Home(),
     ),
     GoRoute(
@@ -215,7 +217,7 @@ class Home extends StatelessWidget {
     deepLinkService.handleLinkClicks(context);
 
     if (user == null) {
-      return const RegisterView();
+      return const LandingView();
     }
     final userData = FirebaseFirestore.instance
         .collection(userCollectionName)

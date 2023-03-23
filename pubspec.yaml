@@ -122,3 +122,5 @@ flutter:
     assets: 
         - .env
         - assets/marker.png
+        - assets/google.png
+        - assets/logo.png
