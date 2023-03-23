@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hand_in_need/constants/colors.dart';
 import 'package:hand_in_need/services/auth/auth_exceptions.dart';
 import 'package:hand_in_need/services/auth/auth_service.dart';
 // Widgets
@@ -40,6 +41,9 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(primary),
+      ),
       body: Container(
         padding: const EdgeInsets.all(30),
         child: Stack(
@@ -48,15 +52,11 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Hold On...',
-                  style: Theme.of(context).textTheme.headline1,
-                ),
+                Text('Hold On...',
+                    style: Theme.of(context).textTheme.headline1),
                 const SizedBox(height: 50),
-                Text(
-                  'Please enter the 6 digit verification code sent to you',
-                  style: Theme.of(context).textTheme.headline3,
-                ),
+                Text('Please enter the 6 digit verification code sent to you',
+                    style: Theme.of(context).textTheme.headline3),
                 const SizedBox(height: 40),
                 Input(
                   controller: _verificationCode,

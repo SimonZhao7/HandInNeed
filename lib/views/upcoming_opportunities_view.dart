@@ -4,7 +4,6 @@ import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
 // Constants
 import 'package:hand_in_need/widgets/events_list.dart';
 
-
 class VolunteeringView extends StatefulWidget {
   const VolunteeringView({super.key});
 
@@ -22,7 +21,8 @@ class _VolunteeringViewState extends State<VolunteeringView> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          flexibleSpace: const TabBar(
+          title: const Text('Events'),
+          bottom: const TabBar(
             tabs: [
               Tab(
                 text: 'Upcoming',

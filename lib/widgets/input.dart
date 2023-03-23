@@ -10,6 +10,7 @@ class Input extends StatelessWidget {
   final TextInputType? type;
   final EdgeInsetsGeometry? innerPadding;
   final String? hint;
+  final bool border;
   final bool password;
   final bool autofocus;
   final bool autocorrect;
@@ -19,8 +20,9 @@ class Input extends StatelessWidget {
   final double borderWidth;
   final int borderColor;
   final int maxLines;
+  final int textColor;
+  final int hintColor;
   final int? maxLength;
-  final int? focusedBorderColor;
   final int? cursorColor;
   final int? fillColor;
 
@@ -33,8 +35,8 @@ class Input extends StatelessWidget {
     this.innerPadding,
     this.borderRadius = defaultBorderRadius,
     this.borderWidth = defaultBorderWidth,
-    this.borderColor = black,
-    this.focusedBorderColor,
+    this.borderColor = secondary,
+    this.border = true,
     this.cursorColor,
     this.autofocus = false,
     this.autocorrect = false,
@@ -45,10 +47,24 @@ class Input extends StatelessWidget {
     this.onTap,
     this.readOnly = false,
     this.enabled,
+    this.textColor = black,
+    this.hintColor = mediumGray,
   });
 
   @override
   Widget build(BuildContext context) {
+    final borderStyle = OutlineInputBorder(
+      borderSide: border
+          ? BorderSide(
+              color: Color(borderColor),
+              width: borderWidth,
+            )
+          : BorderSide.none,
+      borderRadius: BorderRadius.all(
+        Radius.circular(borderRadius),
+      ),
+    );
+
     return TextField(
       textAlignVertical: TextAlignVertical.center,
       controller: controller,
@@ -60,52 +76,26 @@ class Input extends StatelessWidget {
       maxLines: maxLines,
       maxLength: maxLength,
       onChanged: onChanged,
-      style: const TextStyle(
-        color: Colors.black,
+      style: TextStyle(
+        color: Color(textColor),
       ),
       onTap: onTap,
       enabled: enabled,
       readOnly: readOnly,
       decoration: InputDecoration(
         filled: true,
-        fillColor: fillColor != null ? Color(fillColor!) : null,
+        fillColor: fillColor != null ? Color(fillColor!) : Colors.white,
         contentPadding: innerPadding ??
             const EdgeInsets.symmetric(
               vertical: defaultInnerPaddingV,
               horizontal: defaultInnerPaddingH,
             ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Color(borderColor),
-            width: borderWidth,
-          ),
-          borderRadius: BorderRadius.all(
-            Radius.circular(borderRadius),
-          ),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Color(borderColor),
-            width: borderWidth,
-          ),
-          borderRadius: BorderRadius.all(
-            Radius.circular(borderRadius),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: focusedBorderColor != null
-                ? Color(focusedBorderColor!)
-                : Color(borderColor),
-            width: borderWidth,
-          ),
-          borderRadius: BorderRadius.all(
-            Radius.circular(borderRadius),
-          ),
-        ),
+        enabledBorder: borderStyle,
+        disabledBorder: borderStyle,
+        focusedBorder: borderStyle,
         hintText: hint,
-        hintStyle: const TextStyle(
-          color: Color(mediumGray),
+        hintStyle: TextStyle(
+          color: Color(hintColor),
           fontWeight: FontWeight.w500,
         ),
         counter: const SizedBox(height: 0),

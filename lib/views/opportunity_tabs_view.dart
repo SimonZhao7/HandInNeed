@@ -13,7 +13,8 @@ class OpportunityTabsView extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          flexibleSpace: const TabBar(
+          title: const Text('Your Jobs'),
+          bottom: const TabBar(
             tabs: [
               Tab(
                 icon: Text('Your Posts'),
@@ -26,7 +27,7 @@ class OpportunityTabsView extends StatelessWidget {
         ),
         body: const TabBarView(
           children: [
-            OpportunitiesList(  
+            OpportunitiesList(
               type: OpportunityViewType.posted,
             ),
             OpportunitiesList(

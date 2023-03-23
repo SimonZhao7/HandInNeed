@@ -138,8 +138,29 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        primaryColor: const Color(blue),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(primary),
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontFamily: 'Montserrat',
+            color: Color(white),
+          ),
+          iconTheme: IconThemeData(color: Color(white)),
+        ),
+        tabBarTheme: const TabBarTheme(
+          indicator: UnderlineTabIndicator(
+            borderSide: BorderSide(
+              color: Color(accent),
+              width: 5,
+            ),
+          ),
+          labelColor: Color(white),
+        ),
+        bottomAppBarTheme: const BottomAppBarTheme(color: Color(primary)),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: Color(white),
+          unselectedItemColor: Color(gray),
+        ),
         fontFamily: 'Montserrat',
         textTheme: const TextTheme(
           headline1: TextStyle(
@@ -154,10 +175,16 @@ class MyApp extends StatelessWidget {
             fontSize: 20,
             fontWeight: FontWeight.w500,
           ),
-          labelMedium: TextStyle(fontSize: 16),
+          labelMedium: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
         ).apply(
           displayColor: Colors.black,
           bodyColor: Colors.black,
+        ),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: Color(primary),
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
@@ -167,7 +194,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Colors.black,
+          backgroundColor: Color(accent),
           focusColor: Colors.white,
         ),
       ),

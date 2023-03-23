@@ -8,6 +8,7 @@ import '../widgets/button.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
 // Constants
+import 'package:hand_in_need/constants/colors.dart';
 import '../constants/route_names.dart';
 // Util
 import 'package:image_picker/image_picker.dart';
@@ -112,8 +113,9 @@ class _AccountSetupViewState extends State<AccountSetupView> {
     final labelStyle = Theme.of(context).textTheme.labelMedium;
 
     return Scaffold(
+      appBar: AppBar(backgroundColor: const Color(primary)),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 120, horizontal: 30),
+        padding: const EdgeInsets.all(30),
         children: [
           Text(
             'One more step...',

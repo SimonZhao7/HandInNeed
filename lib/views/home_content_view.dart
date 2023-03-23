@@ -33,7 +33,8 @@ class _HomeContentViewState extends State<HomeContentView> {
   final double cardWidth = 250.0;
   OverlayEntry? overlay;
 
-  Set<Marker> getMarkers(List<Opportunity> opportunities) {
+  Set<Marker> getMarkers(
+      List<Opportunity> opportunities, BitmapDescriptor descriptor) {
     return opportunities
         .map(
           (o) => Marker(
@@ -45,6 +46,7 @@ class _HomeContentViewState extends State<HomeContentView> {
                 curve: Curves.easeOutExpo,
               );
             },
+            icon: descriptor,
             markerId: MarkerId(o.place.placeId),
             infoWindow: InfoWindow(
               title: o.title,
@@ -103,7 +105,14 @@ class _HomeContentViewState extends State<HomeContentView> {
                   ? const Text('Home')
                   : Input(
                       controller: _search,
-                      fillColor: white,
+                      border: false,
+                      fillColor: secondary,
+                      textColor: white,
+                      hintColor: white,
+                      innerPadding: const EdgeInsets.symmetric(
+                        vertical: 5,
+                        horizontal: 15,
+                      ),
                       readOnly: true,
                       hint: 'Search for a location...',
                       onTap: () async {
@@ -161,7 +170,7 @@ class _HomeContentViewState extends State<HomeContentView> {
                               .read<MapBloc>()
                               .add(BoundsUpdateEvent(c)));
                         },
-                        markers: getMarkers(state.ops),
+                        markers: getMarkers(state.ops, state.bitmap),
                         myLocationEnabled: true,
                         myLocationButtonEnabled: true,
                         initialCameraPosition: const CameraPosition(

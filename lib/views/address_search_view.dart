@@ -64,10 +64,17 @@ class _AddressSearchViewState extends State<AddressSearchView> {
         title: Input(
           controller: _searchInput,
           borderWidth: 0,
-          fillColor: white,
+          fillColor: secondary,
+          textColor: white,
+          hintColor: white,
+          cursorColor: white,
           onChanged: _updateSearchResults,
           autofocus: true,
           hint: 'Enter an address...',
+          innerPadding: const EdgeInsets.symmetric(
+            vertical: 5,
+            horizontal: 15,
+          ),
         ),
         centerTitle: true,
       ),

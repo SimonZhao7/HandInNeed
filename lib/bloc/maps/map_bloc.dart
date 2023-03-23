@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
 // Services
 import 'package:hand_in_need/services/google_places/google_places_service.dart';
 import 'package:hand_in_need/services/google_places/autocomplete_result.dart';
@@ -13,7 +14,6 @@ import 'dart:async';
 part 'map_events.dart';
 part 'map_states.dart';
 
-
 class MapBloc extends Bloc<MapEvent, MapState> {
   final _opportunityService = OpportunityService();
   final _googlePlacesService = GooglePlacesService();
@@ -25,7 +25,8 @@ class MapBloc extends Bloc<MapEvent, MapState> {
 
   StreamSubscription<List<Opportunity>>? opsStream;
 
-  MapBloc() : super(const LoadingState()) {
+  MapBloc()
+      : super(const LoadingState(bitmap: BitmapDescriptor.defaultMarker)) {
     opsStream = _opportunityService
         .allOpportunities(defaultBounds)
         .listen((value) => add(UpdateDataEvent(value)));
@@ -33,9 +34,13 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     on<InitializeEvent>((event, emit) async {
       try {
         final location = await _geolocationService.getCurrentLocation();
-        emit(PositionSuccessState(position: location));
+        final bitmap = await BitmapDescriptor.fromAssetImage(
+          const ImageConfiguration(),
+          'assets/marker.png',
+        );
+        emit(PositionSuccessState(position: location, bitmap: bitmap));
       } on GeoLocatorException catch (e) {
-        emit(PositionFailState(exception: e));
+        emit(PositionFailState(exception: e, bitmap: state.bitmap));
       }
     });
 
@@ -49,13 +54,15 @@ class MapBloc extends Bloc<MapEvent, MapState> {
     });
 
     on<UpdateLocationEvent>((event, emit) async {
-      emit(const LoadingState());
+      emit(LoadingState(bitmap: state.bitmap));
       final place = await _googlePlacesService.fetchPlace(event.result.placeId);
-      emit(PositionSuccessState(position: place.location));
+      emit(
+          PositionSuccessState(position: place.location, bitmap: state.bitmap));
     });
 
     on<UpdateDataEvent>((event, emit) {
-      emit(FetchSuccessMapState(opportunities: event.ops));
+      emit(
+          FetchSuccessMapState(opportunities: event.ops, bitmap: state.bitmap));
     });
   }
 

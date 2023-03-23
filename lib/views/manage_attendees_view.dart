@@ -3,9 +3,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_service.dart';
 // Constants
-import 'package:hand_in_need/constants/colors.dart';
 import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
 import 'package:hand_in_need/widgets/dialogs/delete_confirmation.dart';
+import 'package:hand_in_need/constants/colors.dart';
 // Util
 import 'package:transparent_image/transparent_image.dart';
 
@@ -66,7 +66,7 @@ class ManageAttendeesView extends StatelessWidget {
                                     onPressed: (context) {},
                                     label: 'Profile',
                                     icon: Icons.account_circle,
-                                    backgroundColor: Colors.blue,
+                                    backgroundColor: const Color(secondary),
                                   ),
                                   if (!eventEnded) ...[
                                     SlidableAction(

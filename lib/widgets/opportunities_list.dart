@@ -59,10 +59,17 @@ class _OpportunitiesListState extends State<OpportunitiesList> {
             }),
             child: Chip(
               label: Text(past ? 'Active Posts' : 'Past Posts'),
-              backgroundColor: Colors.black,
+              backgroundColor: const Color(white),
               labelStyle: const TextStyle(
-                color: Colors.white,
+                color: Color(accent),
+                fontWeight: FontWeight.w700,
                 fontSize: 16,
+              ),
+              shape: const StadiumBorder(
+                side: BorderSide(
+                  width: 2,
+                  color: Color(accent),
+                ),
               ),
             ),
           ),

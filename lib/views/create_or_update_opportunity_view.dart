@@ -100,18 +100,25 @@ class _AddOpportunityState extends State<AddOpportunity> {
                 'Title',
                 style: label,
               ),
+              const SizedBox(height: 5),
               Input(
                 controller: _title,
                 autofocus: true,
               ),
+              const SizedBox(height: 10),
               Text('Description', style: label),
+              const SizedBox(height: 5),
               Input(
                 controller: _description,
                 maxLines: 5,
               ),
+              const SizedBox(height: 10),
               Text('Website', style: label),
+              const SizedBox(height: 5),
               Input(controller: _url),
+              const SizedBox(height: 10),
               Text('Organization Email', style: label),
+              const SizedBox(height: 5),
               Input(controller: _organizationEmail),
               const SizedBox(height: 10),
               if (selectedPhoto != null) ...[
@@ -136,6 +143,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
                 )
               ],
               Text('Image', style: label),
+              const SizedBox(height: 5),
               Button(
                 onPressed: () async {
                   final imagePicker = ImagePicker();
@@ -149,6 +157,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
                     selectedPhoto = photo;
                   });
                 },
+                icon: const Icon(Icons.photo),
                 label: 'Choose a photo',
               ),
               const SizedBox(height: 10),
@@ -156,6 +165,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
                 'Start Date',
                 style: label,
               ),
+              const SizedBox(height: 5),
               Button(
                 onPressed: () async {
                   FocusScope.of(context).unfocus();
@@ -174,12 +184,14 @@ class _AddOpportunityState extends State<AddOpportunity> {
                     startDate = selectedDate ?? startDate;
                   });
                 },
+                icon: const Icon(Icons.calendar_month),
                 label: startDate != null
                     ? dateFormat.format(startDate!)
                     : 'Select a start date',
               ),
               const SizedBox(height: 10),
               Text('Start Time', style: label),
+              const SizedBox(height: 5),
               Button(
                 onPressed: () async {
                   final selectedTime = await _showTimeInput(time: startTime);
@@ -187,12 +199,14 @@ class _AddOpportunityState extends State<AddOpportunity> {
                     startTime = selectedTime ?? startTime;
                   });
                 },
+                icon: const Icon(Icons.alarm),
                 label: startTime != null
                     ? startTime!.format(context)
                     : 'Select a start time',
               ),
               const SizedBox(height: 10),
               Text('End Time', style: label),
+              const SizedBox(height: 5),
               Button(
                 onPressed: () async {
                   final selectedTime = await _showTimeInput(time: endTime);
@@ -200,12 +214,14 @@ class _AddOpportunityState extends State<AddOpportunity> {
                     endTime = selectedTime ?? endTime;
                   });
                 },
+                icon: const Icon(Icons.alarm),
                 label: endTime != null
                     ? endTime!.format(context)
                     : 'Select an end time',
               ),
               const SizedBox(height: 10),
               Text('Address', style: label),
+              const SizedBox(height: 5),
               Input(
                 readOnly: true,
                 controller: _address,

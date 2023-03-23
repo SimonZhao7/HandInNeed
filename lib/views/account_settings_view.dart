@@ -18,28 +18,31 @@ class AccountSettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final authService = AuthService();
 
-    return Column(
-      children: [
-        ListTile(
-          title: Text(
-            'User Settings',
-            style: Theme.of(context).textTheme.labelMedium,
+    return Scaffold(
+      appBar: AppBar(title: const Text('Account Settings')),
+      body: Column(
+        children: [
+          ListTile(
+              title: Text(
+                'User Settings',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context)
+                  .pushSlideRoute(const UserSettingsView())),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Button(
+              onPressed: () async {
+                final navigator = GoRouter.of(context);
+                await authService.signOut();
+                navigator.goNamed(register);
+              },
+              label: 'Sign Out',
+            ),
           ),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.of(context).pushSlideRoute(const UserSettingsView())
-        ),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Button(
-            onPressed: () async {
-              final navigator = GoRouter.of(context);
-              await authService.signOut();
-              navigator.goNamed(register);
-            },
-            label: 'Sign Out',
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hand_in_need/constants/colors.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_exceptions.dart';
 import 'package:hand_in_need/services/auth/auth_service.dart';
@@ -37,6 +38,7 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(backgroundColor: const Color(primary)),
       body: Container(
         padding: const EdgeInsets.all(30),
         child: Column(

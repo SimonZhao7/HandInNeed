@@ -58,7 +58,7 @@ class _OpportunityCardState extends State<OpportunityCard> {
             color: enabled ? const Color(lightGray) : const Color(white),
             border: Border.all(
               width: 2,
-              color: const Color(lightGray),
+              color: const Color(gray),
             ),
             borderRadius: BorderRadius.circular(10),
           ),

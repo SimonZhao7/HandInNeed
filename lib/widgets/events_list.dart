@@ -31,6 +31,7 @@ class EventsList extends StatelessWidget {
               itemBuilder: (context, index) {
                 final op = data[index];
                 return Card(
+                  elevation: 3,
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(

@@ -19,23 +19,11 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final authService = AuthService();
-  final List<String> titles = ['', 'Events', 'Your Jobs', 'Account'];
   int _selectedIndex = 0;
-
-  PreferredSizeWidget? _renderAppBar() {
-    if (titles[_selectedIndex].trim().isNotEmpty) {
-      return AppBar(
-        title: Text(titles[_selectedIndex]),
-        elevation: 0,
-      );
-    }
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _renderAppBar(),
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
@@ -49,13 +37,10 @@ class _HomeViewState extends State<HomeView> {
         notchMargin: 5,
         shape: const CircularNotchedRectangle(),
         elevation: 0,
-        color: Colors.black,
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           elevation: 0,
           backgroundColor: Colors.transparent,
-          unselectedItemColor: const Color.fromARGB(180, 255, 255, 255),
-          selectedItemColor: Colors.white,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -87,7 +72,7 @@ class _HomeViewState extends State<HomeView> {
         onPressed: () {
           context.pushNamed(addOpportunity);
         },
-        child: const Icon(Icons.add)
+        child: const Icon(Icons.add),
       ),
     );
   }

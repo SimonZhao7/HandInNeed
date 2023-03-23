@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hand_in_need/constants/colors.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_exceptions.dart';
 import 'package:hand_in_need/services/auth/auth_service.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // Constants
 import '../constants/widget_const/default_button_values.dart';
+import 'package:hand_in_need/constants/colors.dart';
 
 class Button extends StatelessWidget {
   final void Function() onPressed;
@@ -49,6 +50,7 @@ class Button extends StatelessWidget {
               style: TextStyle(
                 color: textColor != null ? Color(textColor!) : null,
                 fontSize: fontSize ?? defaultFontSize,
+                fontWeight: FontWeight.w500,
               ),
             ),
       ),
@@ -69,8 +71,9 @@ class Button extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        backgroundColor:
-            backgroundColor != null ? Color(backgroundColor!) : null,
+        backgroundColor: backgroundColor != null
+            ? Color(backgroundColor!)
+            : const Color(secondary),
         padding: padding,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
@@ -78,7 +81,7 @@ class Button extends StatelessWidget {
           ),
         ),
       ),
-      child: Stack(children: renderContent()),
+      child: SizedBox(height: 25, child: Stack(children: renderContent())),
     );
   }
 }
