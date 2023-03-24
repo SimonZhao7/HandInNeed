@@ -15,7 +15,7 @@ class Input extends StatelessWidget {
   final bool autofocus;
   final bool autocorrect;
   final bool readOnly;
-  final bool? enabled;
+  final bool enabled;
   final double borderRadius;
   final double borderWidth;
   final int borderColor;
@@ -46,7 +46,7 @@ class Input extends StatelessWidget {
     this.onChanged,
     this.onTap,
     this.readOnly = false,
-    this.enabled,
+    this.enabled = true,
     this.textColor = black,
     this.hintColor = mediumGray,
   });
@@ -84,7 +84,9 @@ class Input extends StatelessWidget {
       readOnly: readOnly,
       decoration: InputDecoration(
         filled: true,
-        fillColor: fillColor != null ? Color(fillColor!) : Colors.white,
+        fillColor: fillColor != null
+            ? Color(fillColor!)
+            : (enabled ? const Color(white) : const Color(gray)),
         contentPadding: innerPadding ??
             const EdgeInsets.symmetric(
               vertical: defaultInnerPaddingV,

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+// Services
+import 'package:hand_in_need/services/auth/auth_exceptions.dart';
+import 'package:hand_in_need/services/auth/auth_service.dart';
 // Widgets
+import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/button.dart';
 // Constants
 import 'package:hand_in_need/constants/route_names.dart';
@@ -12,6 +16,7 @@ class LandingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authService = AuthService();
     return Scaffold(
       backgroundColor: const Color(primary),
       body: Padding(
@@ -42,15 +47,37 @@ class LandingView extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Button(
-                      onPressed: () {},
-                      label: 'Sign In With Google',
-                      borderRadius: 9999,
-                      backgroundColor: white,
-                      textColor: black,
-                      icon: SizedBox(
-                          height: 35,
-                          width: 35,
-                          child: Image.asset('assets/google.png'))),
+                    onPressed: () async {
+                      try {
+                        final router = GoRouter.of(context);
+                        await authService.signInWithGoogle();
+                        await authService.currentUser();
+                        router.goNamed(home);
+                      } catch (e) {
+                        if (e is GoogleSignInAuthException) {
+                          showErrorSnackbar(context, 'Google sign in failed');
+                        } else if (e is NotSignedInAuthException) {
+                          final authDetails = authService.userDetails;
+                          if (authDetails.phoneNumber == null) {
+                            context.goNamed(register);
+                          } else {
+                            context.goNamed(accountSetup);
+                          }
+                        } else {
+                          showErrorSnackbar(context, 'Something went wrong');
+                        }
+                      }
+                    },
+                    label: 'Sign In With Google',
+                    borderRadius: 9999,
+                    backgroundColor: white,
+                    textColor: black,
+                    icon: SizedBox(
+                      height: 35,
+                      width: 35,
+                      child: Image.asset('assets/google.png'),
+                    ),
+                  ),
                   const SizedBox(height: 15),
                   Button(
                     onPressed: () {},
@@ -65,7 +92,7 @@ class LandingView extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   Button(
-                    onPressed: () {
+                    onPressed: () async {
                       context.goNamed(register);
                     },
                     label: 'Sign In With Phone Number',

@@ -26,7 +26,6 @@ class _UserSettingsViewState extends State<UserSettingsView> {
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme;
     final navigator = Navigator.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Settings'),

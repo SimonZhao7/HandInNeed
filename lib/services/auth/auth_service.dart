@@ -1,7 +1,8 @@
 import 'dart:async';
 // Firebase
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // Auth
 import 'package:hand_in_need/services/cloud_storage/cloud_storage_service.dart';
 import 'package:hand_in_need/services/auth/auth_constants.dart';
@@ -13,6 +14,10 @@ import 'auth_exceptions.dart';
 
 class AuthService {
   static final AuthService _shared = AuthService.instance();
+  final _googleSignIn = GoogleSignIn(scopes: [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile'
+  ]);
   AuthService.instance();
   factory AuthService() => _shared;
 
@@ -22,14 +27,28 @@ class AuthService {
   User get userDetails => FirebaseAuth.instance.currentUser!;
 
   Future<AuthUser> getUser(String id) async => AuthUser.fromFirebase(
-        (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs[0],
+        (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs.first,
       );
 
   Future<AuthUser> currentUser() async {
     try {
-      return getUser(FirebaseAuth.instance.currentUser!.uid);
+      return await getUser(FirebaseAuth.instance.currentUser!.uid);
     } catch (_) {
       throw NotSignedInAuthException();
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      final account = await _googleSignIn.signIn();
+      final authentication = await account!.authentication;
+      final credential = GoogleAuthProvider.credential(
+        idToken: authentication.idToken,
+        accessToken: authentication.accessToken,
+      );
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (_) {
+      throw GoogleSignInAuthException();
     }
   }
 
@@ -63,6 +82,7 @@ class AuthService {
 
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
+    await _googleSignIn.signOut();
   }
 
   Future<void> verifyPhoneNumber({
@@ -74,15 +94,21 @@ class AuthService {
         verificationId: verificationId,
         smsCode: verificationCode,
       );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      if (FirebaseAuth.instance.currentUser == null) {
+        await FirebaseAuth.instance.signInWithCredential(credential);
+      } else {
+        await FirebaseAuth.instance.currentUser!.linkWithCredential(credential);
+      }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'session-expired') {
         throw SessionExpiredAuthException();
       } else if (e.code == 'credential-already-in-use') {
         throw PhoneNumberAlreadyInUseAuthException();
-      } else {
+      } else if (e.code == 'invalid-verification-code' ||
+          e.code == 'invalid-verification-id') {
         throw InvalidVerificationCodeAuthException();
+      } else {
+        throw GenericAuthException();
       }
     }
   }

@@ -119,8 +119,7 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
               alignment: Alignment.bottomLeft,
               child: FloatingActionButton(
                 onPressed: () {
-                  final navigator = Navigator.of(context);
-                  navigator.pop();
+                  context.goNamed(register);
                 },
                 child: const Icon(
                   Icons.arrow_back_sharp,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_exceptions.dart';
 import 'package:hand_in_need/services/auth/auth_service.dart';
+import 'package:hand_in_need/services/cloud_storage/cloud_storage_service.dart';
 // Widgets
 import '../widgets/button.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
@@ -23,11 +24,13 @@ class AccountSetupView extends StatefulWidget {
 
 class _AccountSetupViewState extends State<AccountSetupView> {
   final _authService = AuthService();
+  final _googleStorageService = CloudStorageService();
   late TextEditingController _email;
   late TextEditingController _firstName;
   late TextEditingController _lastName;
   late TextEditingController _userName;
   late TextEditingController _description;
+  bool noEmail = true;
   XFile? image;
 
   @override
@@ -37,6 +40,26 @@ class _AccountSetupViewState extends State<AccountSetupView> {
     _lastName = TextEditingController();
     _userName = TextEditingController();
     _description = TextEditingController();
+
+    final userDetails = _authService.userDetails;
+    if (userDetails.email != null) {
+      _email.text = userDetails.email!;
+      noEmail = false;
+    }
+    if (userDetails.displayName != null) {
+      final formattedName = userDetails.displayName!.split(' ');
+      _firstName.text = formattedName[0];
+      _lastName.text = formattedName[1];
+    }
+    if (userDetails.photoURL != null) {
+      _googleStorageService.urlToXFile(url: userDetails.photoURL!).then(
+            (file) => {
+              setState(() {
+                image = file;
+              })
+            },
+          );
+    }
     super.initState();
   }
 
@@ -134,6 +157,7 @@ class _AccountSetupViewState extends State<AccountSetupView> {
           Input(
             controller: _email,
             hint: 'E.g. johndoe@gmail.com',
+            enabled: noEmail,
           ),
           const SizedBox(height: 5),
           Text(
@@ -235,8 +259,10 @@ class _AccountSetupViewState extends State<AccountSetupView> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.goNamed(register);
+        onPressed: () async {
+          final router = GoRouter.of(context);
+          await _authService.signOut();
+          router.goNamed(landing);
         },
         child: const Icon(Icons.arrow_back),
       ),

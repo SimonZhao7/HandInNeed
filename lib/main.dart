@@ -229,7 +229,7 @@ class Home extends StatelessWidget {
         if (snapshot.hasData) {
           final data = snapshot.data!;
           if (data.docs.isEmpty) {
-            return const AccountSetupView();
+            return const LandingView();
           } else {
             return const HomeView();
           }

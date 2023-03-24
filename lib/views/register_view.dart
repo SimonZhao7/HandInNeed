@@ -134,7 +134,7 @@ class _RegisterViewState extends State<RegisterView> {
   }
 
   void _navigateToVerification(String verificationId) {
-    context.pushNamed(
+    context.goNamed(
       verifyPhone,
       params: {
         'verificationId': verificationId,

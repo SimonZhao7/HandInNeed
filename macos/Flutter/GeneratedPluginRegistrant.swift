@@ -11,7 +11,7 @@ import firebase_auth
 import firebase_core
 import firebase_storage
 import geolocator_apple
-import path_provider_macos
+import path_provider_foundation
 import share_plus
 import url_launcher_macos
 
