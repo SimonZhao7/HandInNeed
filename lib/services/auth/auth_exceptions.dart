@@ -6,6 +6,8 @@ class NotSignedInAuthException implements AuthException {}
 
 class GoogleSignInAuthException implements AuthException {}
 
+class FacebookSignInAuthException implements AuthException {}
+
 // Phone Verification
 class InvalidPhoneNumberAuthException implements AuthException {}
 

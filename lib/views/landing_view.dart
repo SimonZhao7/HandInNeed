@@ -80,7 +80,32 @@ class LandingView extends StatelessWidget {
                   ),
                   const SizedBox(height: 15),
                   Button(
-                    onPressed: () {},
+                    onPressed: () async {
+                      try {
+                        final router = GoRouter.of(context);
+                        await authService.signInWithFacebook();
+                        await authService.currentUser();
+                        router.goNamed(home);
+                      } catch (e) {
+                        if (e is FacebookSignInAuthException) {
+                          showErrorSnackbar(
+                            context,
+                            'Facebook sign in failed',
+                          );
+                        } else if (e is NotSignedInAuthException) {
+                          if (authService.userDetails.phoneNumber == null) {
+                            context.pushNamed(register);
+                          } else {
+                            context.pushNamed(accountSetup);
+                          }
+                        } else {
+                          showErrorSnackbar(
+                            context,
+                            'Something went wrong',
+                          );
+                        }
+                      }
+                    },
                     label: 'Sign In With Facebook',
                     borderRadius: 9999,
                     backgroundColor: 0xFF3B579D,

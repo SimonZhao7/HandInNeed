@@ -1,6 +1,7 @@
 import 'dart:async';
 // Firebase
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // Auth
@@ -49,6 +50,18 @@ class AuthService {
       await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (_) {
       throw GoogleSignInAuthException();
+    }
+  }
+
+  Future<void> signInWithFacebook() async {
+    try {
+      final LoginResult loginResult = await FacebookAuth.instance.login(permissions: ['email', 'public_profile']);
+      OAuthCredential credential = FacebookAuthProvider.credential(
+        loginResult.accessToken!.token,
+      );
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (_) {
+      throw FacebookSignInAuthException();
     }
   }
 

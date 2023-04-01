@@ -10,6 +10,8 @@ import 'package:hand_in_need/views/update_profile_photo.dart';
 import 'package:hand_in_need/views/update_username_view.dart';
 // Widgets
 import 'package:hand_in_need/widgets/button.dart';
+// Constants
+import 'package:hand_in_need/constants/colors.dart';
 
 class UserSettingsView extends StatefulWidget {
   const UserSettingsView({super.key});
@@ -100,7 +102,7 @@ class _UserSettingsViewState extends State<UserSettingsView> {
               margin: const EdgeInsets.all(15),
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: const Color(primary),
                 borderRadius: BorderRadius.circular(5),
               ),
               padding: const EdgeInsets.all(20),
@@ -130,7 +132,8 @@ class _UserSettingsViewState extends State<UserSettingsView> {
                       label: verificationSent
                           ? 'Verification Sent'
                           : 'Resend Verification',
-                      fontSize: 14,
+                      fontSize: 16,
+                      backgroundColor: accent,
                     ),
                   )
                 ],
