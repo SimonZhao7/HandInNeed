@@ -10,6 +10,8 @@ import 'package:hand_in_need/views/create_or_update_opportunity_view.dart';
 import 'package:hand_in_need/views/update_phone_number_view.dart';
 import 'package:hand_in_need/views/change_opportunity_email.dart';
 import 'package:hand_in_need/views/opportunity_details_view.dart';
+import 'package:hand_in_need/views/opportunity_signup_view.dart';
+import 'package:hand_in_need/views/setup_signup_password.dart';
 import 'package:hand_in_need/views/manage_attendees_view.dart';
 import 'package:hand_in_need/views/update_username_view.dart';
 import 'package:hand_in_need/views/update_profile_photo.dart';
@@ -22,6 +24,7 @@ import 'package:hand_in_need/views/register_view.dart';
 import 'package:hand_in_need/views/landing_view.dart';
 import 'package:hand_in_need/views/home_view.dart';
 // Services
+import 'package:hand_in_need/services/opportunity_signups/opportunity_signups_service.dart';
 import 'package:hand_in_need/services/auth/auth_constants.dart';
 import 'services/opportunities/opportunity.dart';
 // Constants
@@ -128,7 +131,14 @@ final GoRouter _router = GoRouter(
         opportunityId: state.params['id']!,
         emailHash: state.params['emailHash']!,
       ),
-    )
+    ),
+    GoRoute(
+      path: '/opportunities/setup-signup-password/:id',
+      name: opportunityPasswordSetup,
+      builder: (context, state) => SetupSignupPasswordView(
+        opportunityId: state.params['id']!,
+      ),
+    ),
   ],
 );
 
@@ -231,7 +241,29 @@ class Home extends StatelessWidget {
           if (data.docs.isEmpty) {
             return const LandingView();
           } else {
-            return const HomeView();
+            final opportunitySignupsService = OpportunitiesSignupsService();
+            return StreamBuilder(
+              stream: opportunitySignupsService.getExistingSignups(),
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    if (snapshot.data != null) {
+                      final signup = snapshot.data!;
+                      return OpportunitySignupView(signup: signup);
+                    } else {
+                      // No Signup Popup
+                      return const HomeView();
+                    }
+                  default:
+                    return const Scaffold(
+                      body: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                }
+              },
+            );
           }
         } else {
           return const Scaffold(

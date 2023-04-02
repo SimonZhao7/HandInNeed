@@ -5,6 +5,7 @@ const accountSetup = 'setup-account';
 const home = 'home';
 const addOpportunity = 'add-opportunity';
 const viewOpportunity = 'opportunity-details';
+const opportunityPasswordSetup = 'setup-password';
 const inputAddress = 'address-input';
 const manageAttendees = 'opportunity-manage';
 const changeOpportunityEmail = 'change-opportunity-email';

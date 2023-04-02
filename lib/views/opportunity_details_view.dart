@@ -116,50 +116,62 @@ class OpportunityDetailsView extends StatelessWidget {
                             scheme: 'mailto',
                           ),
                           const SizedBox(height: 40),
-                          owned
-                              ? Button(
-                                  onPressed: () {
-                                    if (started) {
-                                      showErrorSnackbar(
-                                        context,
-                                        'You can not edit this opportunity because event has already begun',
-                                      );
-                                      return;
-                                    }
-                                    context.pushNamed(
-                                      addOpportunity,
-                                      extra: opportunity,
-                                    );
+                          if (owned) ...[
+                            Button(
+                              onPressed: () {
+                                if (started) {
+                                  showErrorSnackbar(
+                                    context,
+                                    'You can not edit this opportunity because event has already begun',
+                                  );
+                                  return;
+                                }
+                                context.pushNamed(
+                                  addOpportunity,
+                                  extra: opportunity,
+                                );
+                              },
+                              label: 'Edit',
+                            ),
+                            const SizedBox(height: 20),
+                            Button(
+                              onPressed: () {
+                                context.pushNamed(
+                                  opportunityPasswordSetup,
+                                  params: {
+                                    'id': opportunityId,
                                   },
-                                  label: 'Edit',
-                                )
-                              : Button(
-                                  onPressed: () {
-                                    if (started) {
-                                      showErrorSnackbar(
-                                        context,
-                                        'You can not join this opportunity because event has already begun',
-                                      );
-                                      return;
-                                    }
-                                    opportunityService.manageJoinStatus(
-                                      opportunityId: opportunity.id,
-                                      userId: authService.userDetails.uid,
-                                    );
-                                    authService.manageJoinStatus(
-                                      opportunityId: opportunity.id,
-                                      userId: authService.userDetails.uid,
-                                      difference:
-                                          opportunity.endTime.difference(
-                                        opportunity.startTime,
-                                      ),
-                                    );
-                                  },
-                                  label: opportunity.attendees
-                                          .contains(authService.userDetails.uid)
-                                      ? 'Leave'
-                                      : 'Join',
-                                )
+                                );
+                              },
+                              label: 'Open Attendee Signup',
+                            )
+                          ] else
+                            Button(
+                              onPressed: () {
+                                if (started) {
+                                  showErrorSnackbar(
+                                    context,
+                                    'You can not join this opportunity because event has already begun',
+                                  );
+                                  return;
+                                }
+                                opportunityService.manageJoinStatus(
+                                  opportunityId: opportunity.id,
+                                  userId: authService.userDetails.uid,
+                                );
+                                authService.manageJoinStatus(
+                                  opportunityId: opportunity.id,
+                                  userId: authService.userDetails.uid,
+                                  difference: opportunity.endTime.difference(
+                                    opportunity.startTime,
+                                  ),
+                                );
+                              },
+                              label: opportunity.attendees
+                                      .contains(authService.userDetails.uid)
+                                  ? 'Leave'
+                                  : 'Join',
+                            ),
                         ],
                       ),
                     )

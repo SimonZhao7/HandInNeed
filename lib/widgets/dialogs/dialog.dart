@@ -26,6 +26,7 @@ Future<T?> displayDialog<T>(
   BuildContext context, {
   required String title,
   required List<Map<String, dynamic>> actions,
+  Widget? content,
 }) {
   return showDialog<T>(
     context: context,
@@ -35,7 +36,9 @@ Future<T?> displayDialog<T>(
         titlePadding: const EdgeInsets.all(20),
         buttonPadding: const EdgeInsets.all(20),
         insetPadding: const EdgeInsets.all(20),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20),
         title: Text(title),
+        content: content,
         actions: [
           Row(
             children: actions
