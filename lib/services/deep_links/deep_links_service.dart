@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 // Firebase
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-// Util
-import 'package:go_router/go_router.dart';
+// Constants
+import 'package:hand_in_need/constants/route_args/change_op_email_args.dart';
+import 'package:hand_in_need/constants/route_names.dart';
 
 class DeepLinksService {
   static final DeepLinksService _shared = DeepLinksService._sharedInstance();
@@ -44,7 +45,14 @@ class DeepLinksService {
   void handleLinkClicks(BuildContext context) {
     FirebaseDynamicLinks.instance.onLink.listen(
       (dynamicLinkData) {
-        context.push(dynamicLinkData.link.path);
+        final pathValues = dynamicLinkData.link.path.split('/');
+        Navigator.of(context).pushNamed(
+          changeOpportunityEmail,
+          arguments: ChangeOpportunityEmailArgs(
+            opportunityId: pathValues[3],
+            emailHash: pathValues[4],
+          ),
+        );
       },
     ).onError((_) {});
   }

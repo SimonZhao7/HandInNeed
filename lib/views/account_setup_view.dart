@@ -13,7 +13,7 @@ import 'package:hand_in_need/constants/colors.dart';
 import '../constants/route_names.dart';
 // Util
 import 'package:image_picker/image_picker.dart';
-import 'package:go_router/go_router.dart';
+
 
 class AccountSetupView extends StatefulWidget {
   const AccountSetupView({super.key});
@@ -80,7 +80,7 @@ class _AccountSetupViewState extends State<AccountSetupView> {
     final userName = _userName.text;
     final description = _description.text;
     final focus = FocusScope.of(context);
-    final navigator = GoRouter.of(context);
+    final navigator = Navigator.of(context);
 
     if (!focus.hasPrimaryFocus) {
       focus.unfocus();
@@ -95,7 +95,7 @@ class _AccountSetupViewState extends State<AccountSetupView> {
         description: description,
         image: image,
       );
-      navigator.goNamed(home);
+      navigator.pushNamedAndRemoveUntil(home, (_) => false);
     } catch (e) {
       if (e is NoEmailProvidedAuthException) {
         showErrorSnackbar(context, 'No email provided');
@@ -134,6 +134,7 @@ class _AccountSetupViewState extends State<AccountSetupView> {
   @override
   Widget build(BuildContext context) {
     final labelStyle = Theme.of(context).textTheme.labelMedium;
+    final navigator = Navigator.of(context);
 
     return Scaffold(
       appBar: AppBar(backgroundColor: const Color(primary)),
@@ -260,9 +261,8 @@ class _AccountSetupViewState extends State<AccountSetupView> {
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final router = GoRouter.of(context);
           await _authService.signOut();
-          router.goNamed(landing);
+          navigator.pushNamedAndRemoveUntil(landing, (_) => false);
         },
         child: const Icon(Icons.arrow_back),
       ),

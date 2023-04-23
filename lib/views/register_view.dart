@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hand_in_need/constants/colors.dart';
+import 'package:hand_in_need/constants/route_args/verify_phone_args.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_exceptions.dart';
 import 'package:hand_in_need/services/auth/auth_service.dart';
@@ -9,8 +10,7 @@ import 'package:hand_in_need/widgets/button.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 // Constants
 import 'package:hand_in_need/constants/route_names.dart';
-// Util
-import 'package:go_router/go_router.dart';
+
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -119,7 +119,7 @@ class _RegisterViewState extends State<RegisterView> {
               alignment: Alignment.bottomLeft,
               child: FloatingActionButton(
                 onPressed: () {
-                  context.goNamed(landing);
+                  Navigator.of(context).pushNamedAndRemoveUntil(landing, (_) => false);
                 },
                 child: const Icon(
                   Icons.arrow_back,
@@ -134,11 +134,10 @@ class _RegisterViewState extends State<RegisterView> {
   }
 
   void _navigateToVerification(String verificationId) {
-    context.goNamed(
+    Navigator.of(context).pushNamedAndRemoveUntil(
       verifyPhone,
-      params: {
-        'verificationId': verificationId,
-      },
+      (_) => false,
+      arguments: VerifyPhoneArgs(verificationId),
     );
     _phoneNumber.text = '';
   }

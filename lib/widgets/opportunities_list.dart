@@ -6,10 +6,10 @@ import '../services/opportunities/opportunity.dart';
 // Widgets
 import 'package:hand_in_need/widgets/button.dart';
 // Constants
+import 'package:hand_in_need/constants/route_args/id_args.dart';
 import 'package:hand_in_need/constants/route_names.dart';
 import 'package:hand_in_need/constants/colors.dart';
 // Util
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class MyWidget extends StatefulWidget {
@@ -160,9 +160,9 @@ class _OpportunitiesListState extends State<OpportunitiesList> {
                                       flex: 1,
                                       child: Button(
                                         onPressed: () {
-                                          context.pushNamed(
+                                          Navigator.of(context).pushNamed(
                                             viewOpportunity,
-                                            params: {'id': opportunity.id},
+                                            arguments: IdArgs(opportunity.id),
                                           );
                                         },
                                         label: 'View',
@@ -203,11 +203,9 @@ class _OpportunitiesListState extends State<OpportunitiesList> {
       return opportunity.verified
           ? Button(
               onPressed: () {
-                context.pushNamed(
+                Navigator.of(context).pushNamed(
                   manageAttendees,
-                  params: {
-                    'id': opportunity.id,
-                  },
+                  arguments: IdArgs(opportunity.id)
                 );
               },
               label: 'Manage',

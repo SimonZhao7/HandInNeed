@@ -8,8 +8,7 @@ import 'package:hand_in_need/widgets/button.dart';
 import 'package:hand_in_need/constants/route_names.dart';
 // Extensions
 import 'package:hand_in_need/extensions/navigator.dart';
-// Util
-import 'package:go_router/go_router.dart';
+
 
 class AccountSettingsView extends StatelessWidget {
   const AccountSettingsView({super.key});
@@ -34,9 +33,9 @@ class AccountSettingsView extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: Button(
               onPressed: () async {
-                final navigator = GoRouter.of(context);
+                final navigator = Navigator.of(context);
                 await authService.signOut();
-                navigator.goNamed(landing);
+                navigator.pushNamedAndRemoveUntil(landing, (_) => false);
               },
               label: 'Sign Out',
             ),

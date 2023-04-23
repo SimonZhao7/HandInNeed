@@ -27,17 +27,29 @@ class AuthService {
 
   User get userDetails => FirebaseAuth.instance.currentUser!;
 
-  Future<AuthUser> getUser(String id) async => AuthUser.fromFirebase(
-        (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs.first,
-      );
-
-  Future<AuthUser> currentUser() async {
+  Future<AuthUser> getUser({
+    required Object field,
+    required Object value,
+  }) async {
     try {
-      return await getUser(FirebaseAuth.instance.currentUser!.uid);
+      return AuthUser.fromFirebase(
+        (await db.where(field, isEqualTo: value).get()).docs.first,
+      );
     } catch (_) {
       throw NotSignedInAuthException();
     }
   }
+
+  Future<AuthUser> getUserFromEmail(String email) =>
+      getUser(field: emailField, value: email);
+
+  Future<AuthUser> getUserById(String id) =>
+      getUser(field: FieldPath.documentId, value: id);
+
+  Future<AuthUser> currentUser() => getUser(
+        field: FieldPath.documentId,
+        value: FirebaseAuth.instance.currentUser!.uid,
+      );
 
   Future<void> signInWithGoogle() async {
     try {
@@ -55,7 +67,8 @@ class AuthService {
 
   Future<void> signInWithFacebook() async {
     try {
-      final LoginResult loginResult = await FacebookAuth.instance.login(permissions: ['email', 'public_profile']);
+      final LoginResult loginResult = await FacebookAuth.instance
+          .login(permissions: ['email', 'public_profile']);
       OAuthCredential credential = FacebookAuthProvider.credential(
         loginResult.accessToken!.token,
       );

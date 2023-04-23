@@ -294,7 +294,7 @@ class OpportunityService {
     required double netDiff,
   }) async {
     for (String id in opportunity.attendees) {
-      final user = await _authService.getUser(id);
+      final user = await _authService.getUserById(id);
       await _authService.updateHoursWorked(
         id: id,
         newHours: user.hoursWorked - netDiff,

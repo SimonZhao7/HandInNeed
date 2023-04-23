@@ -7,13 +7,14 @@ import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/button.dart';
 import 'package:hand_in_need/widgets/input.dart';
 
+
 class ChangeOpportunityEmailView extends StatefulWidget {
-  final String opportunityId;
   final String emailHash;
+  final String opportunityId;
   const ChangeOpportunityEmailView({
     super.key,
-    required this.opportunityId,
     required this.emailHash,
+    required this.opportunityId,
   });
 
   @override
@@ -26,9 +27,13 @@ class _ChangeOpportunityEmailViewState
   final _opportunityService = OpportunityService();
   late TextEditingController _email;
   late TextEditingController _confirmEmail;
+  late String emailHash;
+  late String opportunityId;
 
   @override
   void initState() {
+    emailHash = widget.emailHash;
+    opportunityId = widget.opportunityId;
     _email = TextEditingController();
     _confirmEmail = TextEditingController();
     super.initState();
@@ -74,10 +79,10 @@ class _ChangeOpportunityEmailViewState
                   final email = _email.text;
                   final confirmEmail = _confirmEmail.text;
                   await _opportunityService.transferOwnership(
-                    id: widget.opportunityId,
+                    id: opportunityId,
                     newEmail: email,
                     confirmEmail: confirmEmail,
-                    hash: widget.emailHash,
+                    hash: emailHash,
                   );
                   navigator.pop();
                 } catch (e) {

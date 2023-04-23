@@ -5,10 +5,10 @@ import '../services/opportunities/opportunity_service.dart';
 // Widgets
 import 'package:hand_in_need/widgets/button.dart';
 // Constants
+import 'package:hand_in_need/constants/route_args/id_args.dart';
 import '../constants/route_names.dart';
 // Util
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:go_router/go_router.dart';
 
 class EventsList extends StatelessWidget {
   final Stream<List<Opportunity>> stream;
@@ -52,9 +52,9 @@ class EventsList extends StatelessWidget {
                         const SizedBox(height: 20),
                         Button(
                           onPressed: () {
-                            context.pushNamed(
+                           Navigator.of(context).pushNamed(
                               viewOpportunity,
-                              params: {'id': op.id},
+                              arguments: IdArgs(op.id),
                             );
                           },
                           label: 'View',

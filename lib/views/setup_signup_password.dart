@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:hand_in_need/constants/route_names.dart';
+// Widgets
+import 'package:hand_in_need/widgets/error_snackbar.dart';
+import 'package:hand_in_need/widgets/button.dart';
+import 'package:hand_in_need/widgets/input.dart';
+// Services
 import 'package:hand_in_need/services/opportunity_signups/opportunity_signups_exceptions.dart';
 import 'package:hand_in_need/services/opportunity_signups/opportunity_signups_service.dart';
-import 'package:hand_in_need/widgets/button.dart';
-import 'package:hand_in_need/widgets/error_snackbar.dart';
-import 'package:hand_in_need/widgets/input.dart';
-import 'package:go_router/go_router.dart';
+// Constants
+import 'package:hand_in_need/constants/route_names.dart';
+
 
 class SetupSignupPasswordView extends StatefulWidget {
   final String opportunityId;
@@ -20,11 +23,13 @@ class _SetupSignupPasswordViewState extends State<SetupSignupPasswordView> {
   late TextEditingController _password;
   late TextEditingController _confirmPassword;
   final _opportunitySignupService = OpportunitiesSignupsService();
+  late String opportunityId;
 
   @override
   void initState() {
     _password = TextEditingController();
     _confirmPassword = TextEditingController();
+    opportunityId = widget.opportunityId;
     super.initState();
   }
 
@@ -56,13 +61,13 @@ class _SetupSignupPasswordViewState extends State<SetupSignupPasswordView> {
             Button(
               onPressed: () async {
                 try {
-                  final router = GoRouter.of(context);
+                  final router = Navigator.of(context);
                   await _opportunitySignupService.createSignup(
                     password: _password.text,
                     confirmPassword: _confirmPassword.text,
-                    opportunityId: widget.opportunityId,
+                    opportunityId: opportunityId,
                   );
-                  router.goNamed(landing);
+                  router.pushNamedAndRemoveUntil(landing, (_) => false);
                 } catch (e) {
                   if (e is PasswordTooShortOpportunitySignupsException) {
                     showErrorSnackbar(

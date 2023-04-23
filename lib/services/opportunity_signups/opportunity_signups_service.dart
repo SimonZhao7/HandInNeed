@@ -1,11 +1,16 @@
 import 'dart:async';
-
+// Firebase
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hand_in_need/services/auth/auth_service.dart';
-import 'package:hand_in_need/services/crypto/crypto_service.dart';
-import 'package:hand_in_need/services/opportunity_signups/fields.dart';
+// Services
 import 'package:hand_in_need/services/opportunity_signups/opportunity_signups_exceptions.dart';
+import 'package:hand_in_need/services/notifications/notification_service.dart';
+import 'package:hand_in_need/services/opportunities/opportunity_service.dart';
+import 'package:hand_in_need/services/opportunity_signups/fields.dart';
+import 'package:hand_in_need/services/crypto/crypto_service.dart';
+import 'package:hand_in_need/services/auth/auth_service.dart';
 import 'opportunity_signup.dart';
+// Util
+import 'package:validators/validators.dart';
 
 class OpportunitiesSignupsService {
   static final _shared = OpportunitiesSignupsService._sharedInstance();
@@ -13,6 +18,8 @@ class OpportunitiesSignupsService {
   factory OpportunitiesSignupsService() => _shared;
 
   final db = FirebaseFirestore.instance.collection('opportunity_signups');
+  final _opportunityService = OpportunityService();
+  final _notificationService = NotificationService();
   final _cryptoService = CryptoService();
   final _authService = AuthService();
 
@@ -63,4 +70,28 @@ class OpportunitiesSignupsService {
     }
     await db.doc(id).delete();
   }
+
+  Future<void> sendSignupNotification({
+    required OpportunitySignup signup,
+    required String email,
+  }) async {
+    final op = await _opportunityService
+        .getOpportunityStream(signup.opportunityId)
+        .first;
+
+    if (!isEmail(email)) throw InvalidEmailSignupsException();
+    final user = await _authService.getUserFromEmail(email);
+    if (!op.attendees.contains(user.id)) {
+      throw NotSignedUpForEventSignupsException();
+    }
+    await _notificationService.sendMessageToUser(
+      userId: user.id,
+      signupId: signup.id,
+    );
+  }
+
+  Stream<OpportunitySignup> getSignupStream(String id) => db
+      .where(FieldPath.documentId, isEqualTo: id)
+      .snapshots()
+      .map((s) => OpportunitySignup.fromFirebase(s.docs[0]));
 }

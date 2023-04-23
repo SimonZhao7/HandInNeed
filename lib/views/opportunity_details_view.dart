@@ -8,10 +8,11 @@ import 'package:hand_in_need/widgets/link_text.dart';
 import 'package:hand_in_need/widgets/button.dart';
 // Util
 import 'package:transparent_image/transparent_image.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 // Constants
+import 'package:hand_in_need/constants/route_args/add_opportunity_args.dart';
 import 'package:hand_in_need/constants/route_names.dart';
+import '../constants/route_args/id_args.dart';
 
 class OpportunityDetailsView extends StatelessWidget {
   final String opportunityId;
@@ -23,6 +24,7 @@ class OpportunityDetailsView extends StatelessWidget {
     final opportunityService = OpportunityService();
     final textStyle = Theme.of(context).textTheme;
     final dateFormat = DateFormat.yMd().add_jm();
+    final navigator = Navigator.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -126,9 +128,9 @@ class OpportunityDetailsView extends StatelessWidget {
                                   );
                                   return;
                                 }
-                                context.pushNamed(
+                                navigator.pushNamed(
                                   addOpportunity,
-                                  extra: opportunity,
+                                  arguments: AddOpportunityArgs(opportunity)
                                 );
                               },
                               label: 'Edit',
@@ -136,11 +138,9 @@ class OpportunityDetailsView extends StatelessWidget {
                             const SizedBox(height: 20),
                             Button(
                               onPressed: () {
-                                context.pushNamed(
+                                navigator.pushNamed(
                                   opportunityPasswordSetup,
-                                  params: {
-                                    'id': opportunityId,
-                                  },
+                                  arguments: IdArgs(opportunityId)
                                 );
                               },
                               label: 'Open Attendee Signup',

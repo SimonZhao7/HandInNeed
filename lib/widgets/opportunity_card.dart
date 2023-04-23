@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 // Services
 import 'package:hand_in_need/services/opportunities/opportunity.dart';
 // Constants
+import 'package:hand_in_need/constants/route_args/id_args.dart';
 import 'package:hand_in_need/constants/colors.dart';
 import '../constants/route_names.dart';
-// Util
-import 'package:go_router/go_router.dart';
 
 class OpportunityCard extends StatefulWidget {
   final double cardWidth;
@@ -43,9 +42,9 @@ class _OpportunityCardState extends State<OpportunityCard> {
       width: widget.cardWidth,
       child: GestureDetector(
         onTap: () {
-          context.pushNamed(
+          Navigator.of(context).pushNamed(
             viewOpportunity,
-            params: {'id': op.id},
+            arguments: IdArgs(op.id),
           );
         },
         onTapDown: handleClick,

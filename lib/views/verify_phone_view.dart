@@ -8,15 +8,11 @@ import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/input.dart';
 // Constants
 import 'package:hand_in_need/constants/route_names.dart';
-// Util
-import 'package:go_router/go_router.dart';
+
 
 class VerifyPhoneView extends StatefulWidget {
   final String verificationId;
-  const VerifyPhoneView({
-    super.key,
-    required this.verificationId,
-  });
+  const VerifyPhoneView({super.key, required this.verificationId});
 
   @override
   State<VerifyPhoneView> createState() => _VerifyPhoneViewState();
@@ -25,9 +21,11 @@ class VerifyPhoneView extends StatefulWidget {
 class _VerifyPhoneViewState extends State<VerifyPhoneView> {
   final _authService = AuthService();
   late TextEditingController _verificationCode;
+  late String verificationId;
 
   @override
   void initState() {
+    verificationId = widget.verificationId;
     _verificationCode = TextEditingController();
     super.initState();
   }
@@ -40,6 +38,7 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
 
   @override
   Widget build(BuildContext context) {
+    final navigator = Navigator.of(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(primary),
@@ -70,7 +69,6 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
                   onPressed: () async {
                     try {
                       final focus = FocusScope.of(context);
-                      final navigator = GoRouter.of(context);
                       final verificationCode = _verificationCode.text;
 
                       if (!focus.hasPrimaryFocus) {
@@ -78,12 +76,15 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
                       }
 
                       await _authService.verifyPhoneNumber(
-                        verificationId: widget.verificationId,
+                        verificationId: verificationId,
                         verificationCode: verificationCode,
                       );
                       try {
                         await _authService.currentUser();
-                        navigator.goNamed(home);
+                        navigator.pushNamedAndRemoveUntil(
+                          home,
+                          (_) => false,
+                        );
                       } on NotSignedInAuthException {
                         navigator.pushNamed(accountSetup);
                       }
@@ -119,7 +120,7 @@ class _VerifyPhoneViewState extends State<VerifyPhoneView> {
               alignment: Alignment.bottomLeft,
               child: FloatingActionButton(
                 onPressed: () {
-                  context.goNamed(register);
+                  navigator.pushNamedAndRemoveUntil(register, (_) => false);
                 },
                 child: const Icon(
                   Icons.arrow_back_sharp,

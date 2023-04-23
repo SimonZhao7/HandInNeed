@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hand_in_need/constants/route_names.dart';
 // Services
 import 'package:hand_in_need/services/auth/auth_service.dart';
+import '../services/notifications/notification_service.dart';
 // Views
-import 'package:hand_in_need/views/home_content_view.dart';
+import 'package:hand_in_need/views/upcoming_opportunities_view.dart';
 import 'package:hand_in_need/views/opportunity_tabs_view.dart';
 import 'package:hand_in_need/views/account_settings_view.dart';
-import 'package:hand_in_need/views/upcoming_opportunities_view.dart';
-// Util
-import 'package:go_router/go_router.dart';
+import 'package:hand_in_need/views/home_content_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -19,7 +18,20 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   final authService = AuthService();
+  final notificationService = NotificationService();
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    notificationService.updateDeviceTokens(authService.userDetails.uid);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    notificationService.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +82,7 @@ class _HomeViewState extends State<HomeView> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.pushNamed(addOpportunity);
+          Navigator.of(context).pushNamed(addOpportunity);
         },
         child: const Icon(Icons.add),
       ),

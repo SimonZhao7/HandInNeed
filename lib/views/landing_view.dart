@@ -8,14 +8,13 @@ import 'package:hand_in_need/widgets/button.dart';
 // Constants
 import 'package:hand_in_need/constants/route_names.dart';
 import 'package:hand_in_need/constants/colors.dart';
-// Util
-import 'package:go_router/go_router.dart';
 
 class LandingView extends StatelessWidget {
   const LandingView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final navigator = Navigator.of(context);
     final authService = AuthService();
     return Scaffold(
       backgroundColor: const Color(primary),
@@ -49,19 +48,20 @@ class LandingView extends StatelessWidget {
                   Button(
                     onPressed: () async {
                       try {
-                        final router = GoRouter.of(context);
                         await authService.signInWithGoogle();
                         await authService.currentUser();
-                        router.goNamed(home);
+                        navigator.pushNamedAndRemoveUntil(home, (_) => false);
                       } catch (e) {
                         if (e is GoogleSignInAuthException) {
                           showErrorSnackbar(context, 'Google sign in failed');
                         } else if (e is NotSignedInAuthException) {
                           final authDetails = authService.userDetails;
                           if (authDetails.phoneNumber == null) {
-                            context.goNamed(register);
+                            navigator.pushNamedAndRemoveUntil(
+                                register, (_) => false);
                           } else {
-                            context.goNamed(accountSetup);
+                            navigator.pushNamedAndRemoveUntil(
+                                accountSetup, (_) => false);
                           }
                         } else {
                           showErrorSnackbar(context, 'Something went wrong');
@@ -82,10 +82,9 @@ class LandingView extends StatelessWidget {
                   Button(
                     onPressed: () async {
                       try {
-                        final router = GoRouter.of(context);
                         await authService.signInWithFacebook();
                         await authService.currentUser();
-                        router.goNamed(home);
+                        navigator.pushNamedAndRemoveUntil(home, (_) => false);
                       } catch (e) {
                         if (e is FacebookSignInAuthException) {
                           showErrorSnackbar(
@@ -94,9 +93,9 @@ class LandingView extends StatelessWidget {
                           );
                         } else if (e is NotSignedInAuthException) {
                           if (authService.userDetails.phoneNumber == null) {
-                            context.pushNamed(register);
+                            navigator.pushNamed(register);
                           } else {
-                            context.pushNamed(accountSetup);
+                            navigator.pushNamed(accountSetup);
                           }
                         } else {
                           showErrorSnackbar(
@@ -118,7 +117,7 @@ class LandingView extends StatelessWidget {
                   const SizedBox(height: 15),
                   Button(
                     onPressed: () async {
-                      context.goNamed(register);
+                      navigator.pushNamedAndRemoveUntil(register, (_) => false);
                     },
                     label: 'Sign In With Phone Number',
                     borderRadius: 9999,

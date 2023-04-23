@@ -8,7 +8,6 @@ import 'package:image_picker/image_picker.dart';
 // Constants
 import 'package:hand_in_need/constants/colors.dart';
 // Util
-import 'package:go_router/go_router.dart';
 import 'dart:io';
 
 class UpdateProfilePhotoView extends StatefulWidget {
@@ -98,7 +97,7 @@ class _UpdateProfilePhotoViewState extends State<UpdateProfilePhotoView> {
                       .updateProfilePhoto(
                         photo: _selectedPhoto,
                       )
-                      .then((_) => context.pop())
+                      .then((_) => Navigator.of(context).pop())
                       .catchError(
                         (_) => showErrorSnackbar(
                           context,

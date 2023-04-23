@@ -8,21 +8,20 @@ import 'package:hand_in_need/views/address_search_view.dart';
 import 'package:hand_in_need/widgets/dialogs/delete_confirmation.dart';
 import '../services/google_places/autocomplete_result.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
+import '../services/opportunities/opportunity.dart';
 import 'package:hand_in_need/widgets/input.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/opportunities/opportunity.dart';
 import '../widgets/button.dart';
 // Constants
 import 'package:hand_in_need/constants/route_names.dart';
 import 'package:hand_in_need/constants/colors.dart';
 // Util
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 
 class AddOpportunity extends StatefulWidget {
   final Opportunity? opportunity;
-  const AddOpportunity({super.key, this.opportunity});
+  const AddOpportunity({super.key, required this.opportunity});
 
   @override
   State<AddOpportunity> createState() => _AddOpportunityState();
@@ -35,6 +34,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
   late TextEditingController _url;
   late TextEditingController _organizationEmail;
   late TextEditingController _address;
+  late Opportunity? opportunity;
   XFile? selectedPhoto;
   DateTime? startDate;
   TimeOfDay? startTime;
@@ -43,27 +43,27 @@ class _AddOpportunityState extends State<AddOpportunity> {
 
   @override
   void initState() {
+    opportunity = widget.opportunity;
     _title = TextEditingController();
     _description = TextEditingController();
     _url = TextEditingController();
     _organizationEmail = TextEditingController();
     _address = TextEditingController();
 
-    final opportunity = widget.opportunity;
     if (opportunity != null) {
-      final place = opportunity.place;
+      final place = opportunity!.place;
       final autoLocation = AutocompleteResult(
         description: '${place.name}, ${place.address}',
         placeId: place.placeId,
       );
 
-      _title.text = opportunity.title;
-      _description.text = opportunity.description;
-      _url.text = opportunity.url;
-      _organizationEmail.text = opportunity.organizationEmail;
-      startDate = opportunity.startDate;
-      startTime = TimeOfDay.fromDateTime(opportunity.startTime);
-      endTime = TimeOfDay.fromDateTime(opportunity.endTime);
+      _title.text = opportunity!.title;
+      _description.text = opportunity!.description;
+      _url.text = opportunity!.url;
+      _organizationEmail.text = opportunity!.organizationEmail;
+      startDate = opportunity!.startDate;
+      startTime = TimeOfDay.fromDateTime(opportunity!.startTime);
+      endTime = TimeOfDay.fromDateTime(opportunity!.endTime);
       location = autoLocation;
       _address.text = autoLocation.description;
     }
@@ -84,7 +84,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat.yMd();
     final label = Theme.of(context).textTheme.labelMedium;
-    final editing = widget.opportunity != null;
+    final editing = opportunity != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -137,7 +137,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
                   height: 250,
                   width: double.infinity,
                   child: Image.network(
-                    widget.opportunity!.image,
+                    opportunity!.image,
                     fit: BoxFit.cover,
                   ),
                 )
@@ -258,7 +258,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
   }
 
   void _handleSubmit() async {
-    final editing = widget.opportunity != null;
+    final editing = opportunity != null;
     final title = _title.text;
     final description = _description.text;
     final url = _url.text;
@@ -268,7 +268,7 @@ class _AddOpportunityState extends State<AddOpportunity> {
     try {
       if (editing) {
         await _opportunityService.updateOpportunity(
-          id: widget.opportunity!.id,
+          id: opportunity!.id,
           title: title,
           description: description,
           url: url,
@@ -337,15 +337,15 @@ class _AddOpportunityState extends State<AddOpportunity> {
   }
 
   void _showDeleteDialog() async {
+    final navigator = Navigator.of(context);
     final value = await showDeleteConfirmationDialog(
           context,
           'Are you sure you want to delete this opportunity?',
         ) ??
         false;
     if (value) {
-      _opportunityService
-          .deleteOpportunity(widget.opportunity!.id)
-          .then((_) => context.goNamed(home));
+      await _opportunityService.deleteOpportunity(opportunity!.id);
+      navigator.pushNamed(home);
     }
   }
 

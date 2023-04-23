@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // Firebase
 import 'package:hand_in_need/services/deep_links/deep_links_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,6 +12,7 @@ import 'package:hand_in_need/views/update_phone_number_view.dart';
 import 'package:hand_in_need/views/change_opportunity_email.dart';
 import 'package:hand_in_need/views/opportunity_details_view.dart';
 import 'package:hand_in_need/views/opportunity_signup_view.dart';
+import 'package:hand_in_need/views/verify_attendence_view.dart';
 import 'package:hand_in_need/views/setup_signup_password.dart';
 import 'package:hand_in_need/views/manage_attendees_view.dart';
 import 'package:hand_in_need/views/update_username_view.dart';
@@ -25,15 +27,54 @@ import 'package:hand_in_need/views/landing_view.dart';
 import 'package:hand_in_need/views/home_view.dart';
 // Services
 import 'package:hand_in_need/services/opportunity_signups/opportunity_signups_service.dart';
+import 'package:hand_in_need/services/notifications/notification_service.dart';
 import 'package:hand_in_need/services/auth/auth_constants.dart';
-import 'services/opportunities/opportunity.dart';
 // Constants
+import 'package:hand_in_need/constants/route_args/add_opportunity_args.dart';
+import 'package:hand_in_need/constants/route_args/change_op_email_args.dart';
+import 'package:hand_in_need/constants/route_args/id_args.dart';
 import 'package:hand_in_need/constants/route_names.dart';
 import 'package:hand_in_need/constants/colors.dart';
-// Router
-import 'package:go_router/go_router.dart';
 // Util
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void handleNotificationClick(NotificationResponse details) {
+  navigatorKey.currentState?.pushNamed(verifyAttendence);
+}
+
+@pragma('vm:entry-point')
+Future<void> _backgroundMessageHandler(RemoteMessage message) async {
+  const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const initSettings = InitializationSettings(android: androidSettings);
+  final plugin = FlutterLocalNotificationsPlugin();
+  plugin.initialize(
+    initSettings,
+    onDidReceiveBackgroundNotificationResponse: handleNotificationClick,
+    onDidReceiveNotificationResponse: handleNotificationClick,
+  );
+  plugin.getNotificationAppLaunchDetails();
+  const notificationDetails = NotificationDetails(
+    android: AndroidNotificationDetails(
+      'verify',
+      'verify',
+      channelDescription: 'verification for signups',
+      importance: Importance.max,
+      priority: Priority.max,
+    ),
+  );
+
+  await plugin.show(
+    0,
+    message.notification!.title,
+    message.notification!.body,
+    notificationDetails,
+    payload: message.data['signupId'] as String,
+  );
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,112 +83,17 @@ void main() async {
   );
   await dotenv.load(fileName: '.env');
   runApp(const MyApp());
+  FirebaseMessaging.onBackgroundMessage(_backgroundMessageHandler);
+  FirebaseMessaging.onMessage.listen(_backgroundMessageHandler);
 }
 
-final GoRouter _router = GoRouter(
-  routes: [
-    GoRoute(
-      path: '/',
-      name: landing,
-      builder: (context, state) => const Home(),
-    ),
-    GoRoute(
-      path: '/home',
-      name: home,
-      builder: (context, state) => const HomeView(),
-    ),
-    GoRoute(
-      path: '/address/input',
-      name: inputAddress,
-      builder: (context, state) => const AddressSearchView(),
-    ),
-    GoRoute(
-      path: '/auth/register',
-      name: register,
-      builder: (context, state) => const RegisterView(),
-    ),
-    GoRoute(
-      name: accountSetup,
-      path: '/auth/setup',
-      builder: (context, state) => const AccountSetupView(),
-    ),
-    GoRoute(
-      path: '/auth/verify-phone/:verificationId',
-      name: verifyPhone,
-      builder: (context, state) => VerifyPhoneView(
-        verificationId: state.params['verificationId']!,
-      ),
-    ),
-    GoRoute(
-      path: '/auth/user-settings',
-      name: userSettings,
-      builder: (context, state) => const UserSettingsView(),
-    ),
-    GoRoute(
-      path: '/auth/update/photo',
-      name: updateProfilePhoto,
-      builder: (context, state) => const UpdateProfilePhotoView(),
-    ),
-    GoRoute(
-      path: '/auth/update/phone-number',
-      name: updatePhoneNumber,
-      builder: (context, state) => const UpdatePhoneNumberView(),
-    ),
-    GoRoute(
-      path: '/auth/update/email',
-      name: updateEmail,
-      builder: (context, state) => const UpdateEmailView(),
-    ),
-    GoRoute(
-      path: '/auth/update/username',
-      name: updateUsernmae,
-      builder: (context, state) => const UpdateUsernameView(),
-    ),
-    GoRoute(
-      path: '/opportunities/add',
-      name: addOpportunity,
-      builder: (context, state) => AddOpportunity(
-        opportunity: state.extra as Opportunity?,
-      ),
-    ),
-    GoRoute(
-      path: '/opportunities/details/:id',
-      name: viewOpportunity,
-      builder: (context, state) => OpportunityDetailsView(
-        opportunityId: state.params['id']!,
-      ),
-    ),
-    GoRoute(
-      path: '/opportunties/:id/manage',
-      name: manageAttendees,
-      builder: (context, state) => ManageAttendeesView(
-        opportunityId: state.params['id']!,
-      ),
-    ),
-    GoRoute(
-      path: '/opportunities/change-email/:id/:emailHash',
-      name: changeOpportunityEmail,
-      builder: (context, state) => ChangeOpportunityEmailView(
-        opportunityId: state.params['id']!,
-        emailHash: state.params['emailHash']!,
-      ),
-    ),
-    GoRoute(
-      path: '/opportunities/setup-signup-password/:id',
-      name: opportunityPasswordSetup,
-      builder: (context, state) => SetupSignupPasswordView(
-        opportunityId: state.params['id']!,
-      ),
-    ),
-  ],
-);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         appBarTheme: const AppBarTheme(
@@ -210,8 +156,70 @@ class MyApp extends StatelessWidget {
           focusColor: Colors.white,
         ),
       ),
-      routerConfig: _router,
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
+      routes: {
+        landing: (context) => const Home(),
+        home: (context) => const HomeView(),
+        inputAddress: (context) => const AddressSearchView(),
+        register: (context) => const RegisterView(),
+        accountSetup: (context) => const AccountSetupView(),
+        userSettings: (context) => const UserSettingsView(),
+        updateProfilePhoto: (context) => const UpdateProfilePhotoView(),
+        updatePhoneNumber: (context) => const UpdatePhoneNumberView(),
+        updateEmail: (context) => const UpdateEmailView(),
+        updateUsername: (context) => const UpdateUsernameView(),
+        verifyAttendence: (context) => const VerifyAttendenceView(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == addOpportunity) {
+          final ags = settings.arguments;
+          return MaterialPageRoute(
+            builder: (context) => ags == null
+                ? const AddOpportunity(opportunity: null)
+                : AddOpportunity(
+                    opportunity: (ags as AddOpportunityArgs).opportunity),
+          );
+        } else if (settings.name == changeOpportunityEmail) {
+          final args = settings.arguments as ChangeOpportunityEmailArgs;
+          return MaterialPageRoute(
+            builder: (context) => ChangeOpportunityEmailView(
+              emailHash: args.emailHash,
+              opportunityId: args.opportunityId,
+            ),
+          );
+        } else if (settings.name == manageAttendees) {
+          final args = settings.arguments as IdArgs;
+          return MaterialPageRoute(
+            builder: (context) => ManageAttendeesView(
+              opportunityId: args.id,
+            ),
+          );
+        } else if (settings.name == viewOpportunity) {
+          final args = settings.arguments as IdArgs;
+          return MaterialPageRoute(
+            builder: (context) => OpportunityDetailsView(
+              opportunityId: args.id,
+            ),
+          );
+        } else if (settings.name == opportunityPasswordSetup) {
+          final args = settings.arguments as IdArgs;
+          return MaterialPageRoute(
+            builder: (context) => SetupSignupPasswordView(
+              opportunityId: args.id,
+            ),
+          );
+        } else if (settings.name == verifyPhone) {
+          final args = settings.arguments as IdArgs;
+          return MaterialPageRoute(
+            builder: (context) => VerifyPhoneView(
+              verificationId: args.id,
+            ),
+          );
+        } else {
+          return null;
+        }
+      },
     );
   }
 }
@@ -222,9 +230,11 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deepLinkService = DeepLinksService();
+    final notificationService = NotificationService();
     final user = FirebaseAuth.instance.currentUser;
 
     deepLinkService.handleLinkClicks(context);
+    notificationService.requestPermisstions();
 
     if (user == null) {
       return const LandingView();
