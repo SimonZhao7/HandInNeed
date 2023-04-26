@@ -4,10 +4,10 @@ import 'package:hand_in_need/services/auth/auth_service.dart';
 // Extensions
 import 'package:hand_in_need/extensions/navigator.dart';
 // Views
-import 'package:hand_in_need/views/update_email_view.dart';
 import 'package:hand_in_need/views/update_phone_number_view.dart';
 import 'package:hand_in_need/views/update_profile_photo.dart';
 import 'package:hand_in_need/views/update_username_view.dart';
+import 'package:hand_in_need/views/update_email_view.dart';
 // Widgets
 import 'package:hand_in_need/widgets/button.dart';
 // Constants
@@ -85,6 +85,10 @@ class _UserSettingsViewState extends State<UserSettingsView> {
                               Text(
                                 _authService.userDetails.phoneNumber!,
                               ),
+                              const SizedBox(height: 10),
+                              Text(
+                                '${user.hoursWorked.toStringAsFixed(2)} hours volunteered',
+                              )
                             ],
                           ),
                         ),

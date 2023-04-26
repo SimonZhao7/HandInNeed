@@ -1,5 +1,7 @@
 import 'dart:async';
 // Firebase
+import 'package:hand_in_need/services/geolocator/geolocator_service.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // Services
 import 'package:hand_in_need/services/opportunity_signups/opportunity_signups_exceptions.dart';
@@ -20,8 +22,14 @@ class OpportunitiesSignupsService {
   final db = FirebaseFirestore.instance.collection('opportunity_signups');
   final _opportunityService = OpportunityService();
   final _notificationService = NotificationService();
+  final _geoService = GeoLocatorService();
   final _cryptoService = CryptoService();
   final _authService = AuthService();
+
+  Future<OpportunitySignup> getSignup(String id) async =>
+      OpportunitySignup.fromFirebase(
+        (await db.where(FieldPath.documentId, isEqualTo: id).get()).docs[0],
+      );
 
   Stream<OpportunitySignup?> getExistingSignups() => db
       .where(userIdField, isEqualTo: _authService.userDetails.uid)
@@ -87,6 +95,59 @@ class OpportunitiesSignupsService {
     await _notificationService.sendMessageToUser(
       userId: user.id,
       signupId: signup.id,
+    );
+  }
+
+  Future<void> verifySignup({
+    required String id,
+    required LatLng location,
+  }) async {
+    final user = await _authService.currentUser();
+    final signup = await getSignup(id);
+    final opportuinty = await _opportunityService
+        .getOpportunityStream(signup.opportunityId)
+        .first;
+    final dist = _geoService.getDistance(
+      start: opportuinty.place.location,
+      end: location,
+    );
+
+    if (dist > 10) {
+      throw DistanceTooFarSignupsException();
+    }
+
+    await db.doc(id).update({
+      verifiedEmailField: user.email,
+    });
+  }
+
+  Future<void> updateAttendanceStatus({
+    required String id,
+    required String? enteredEmail,
+  }) async {
+    final signup = await getSignup(id);
+
+    await db.doc(id).update({
+      verifiedEmailField: null,
+    });
+
+    if (enteredEmail == null || enteredEmail != signup.verifiedEmail) {
+      throw AccountMismatchSignupsException();
+    }
+
+    final user = await _authService.getUserFromEmail(signup.verifiedEmail!);
+    final op = await _opportunityService
+        .getOpportunityStream(signup.opportunityId)
+        .first;
+
+    if (user.attended.contains(op.id)) {
+      throw AlreadyAttendedSignupsException();
+    }
+
+    await _authService.manageAttendedStatus(
+      opportunityId: op.id,
+      difference: op.endTime.difference(op.startTime),
+      userId: user.id,
     );
   }
 

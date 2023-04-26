@@ -39,11 +39,13 @@ import 'package:hand_in_need/constants/colors.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void handleNotificationClick(NotificationResponse details) {
-  navigatorKey.currentState?.pushNamed(verifyAttendence);
+  navigatorKey.currentState?.pushNamed(
+    verifyAttendence,
+    arguments: IdArgs(details.payload!),
+  );
 }
 
 @pragma('vm:entry-point')
@@ -86,7 +88,6 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_backgroundMessageHandler);
   FirebaseMessaging.onMessage.listen(_backgroundMessageHandler);
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -169,7 +170,6 @@ class MyApp extends StatelessWidget {
         updatePhoneNumber: (context) => const UpdatePhoneNumberView(),
         updateEmail: (context) => const UpdateEmailView(),
         updateUsername: (context) => const UpdateUsernameView(),
-        verifyAttendence: (context) => const VerifyAttendenceView(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == addOpportunity) {
@@ -215,6 +215,11 @@ class MyApp extends StatelessWidget {
             builder: (context) => VerifyPhoneView(
               verificationId: args.id,
             ),
+          );
+        } else if (settings.name == verifyAttendence) {
+          final args = settings.arguments as IdArgs;
+          return MaterialPageRoute(
+            builder: (context) => VerifyAttendenceView(signupId: args.id),
           );
         } else {
           return null;

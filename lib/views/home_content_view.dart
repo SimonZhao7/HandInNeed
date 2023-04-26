@@ -58,6 +58,12 @@ class _HomeContentViewState extends State<HomeContentView> {
   }
 
   @override
+  void dispose() {
+    overlay?.remove();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme;
 
