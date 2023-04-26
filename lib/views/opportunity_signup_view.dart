@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hand_in_need/constants/colors.dart';
+import 'dart:async';
 // Services
 import 'package:hand_in_need/services/opportunity_signups/opportunity_signups_exceptions.dart';
 import 'package:hand_in_need/services/opportunity_signups/opportunity_signups_service.dart';
@@ -11,6 +11,8 @@ import 'package:hand_in_need/widgets/dialogs/dialog.dart';
 import 'package:hand_in_need/widgets/error_snackbar.dart';
 import 'package:hand_in_need/widgets/button.dart';
 import 'package:hand_in_need/widgets/input.dart';
+// Constants
+import 'package:hand_in_need/constants/colors.dart';
 
 class OpportunitySignupView extends StatefulWidget {
   final OpportunitySignup signup;
@@ -28,6 +30,14 @@ class _OpportunitySignupViewState extends State<OpportunitySignupView> {
   bool success = false;
   bool error = false;
   String? signUpEmail;
+
+  Stream<int> getTimer({required int seconds}) async* {
+    while (seconds > 0) {
+      yield seconds;
+      seconds--;
+      await Future.delayed(const Duration(seconds: 1));
+    }
+  }
 
   @override
   void initState() {
@@ -142,12 +152,23 @@ class _OpportunitySignupViewState extends State<OpportunitySignupView> {
                 const SizedBox(height: 40),
                 if (signUpEmail != null)
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const CircularProgressIndicator(),
+                      const Center(child: CircularProgressIndicator()),
                       const SizedBox(height: 20),
                       Text(
-                        'Please continue the verification process through your account...',
+                        'Please continue the verification process through your phone.',
                         style: textStyle.labelMedium,
+                      ),
+                      const SizedBox(height: 20),
+                      StreamBuilder(
+                        stream: getTimer(seconds: 60),
+                        builder: (context, snapshot) {
+                          final seconds = snapshot.data;
+                          return Text(
+                            'Time Remaining: $seconds seconds...',
+                          );
+                        },
                       ),
                       const SizedBox(height: 40),
                     ],
